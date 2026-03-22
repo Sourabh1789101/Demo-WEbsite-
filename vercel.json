@@ -1,0 +1,6 @@
+{
+  "version": 2,
+  "installCommand": "cd my-docs-app && npm install",
+  "buildCommand": "cd my-docs-app && npm run build",
+  "outputDirectory": "my-docs-app/dist"
+}
