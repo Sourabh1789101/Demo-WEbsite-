@@ -1,0 +1,3 @@
+*.html
+my-docs-app/node_modules
+my-docs-app/dist

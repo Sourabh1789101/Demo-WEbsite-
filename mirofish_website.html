@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiroFish — Swarm Intelligence Prediction Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & ROOT ─────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+:root{
+  --teal:   #0ea575;
+  --teal2:  #0d7a57;
+  --teal3:  #e1f7ef;
+  --purple: #6d4aff;
+  --amber:  #f59e0b;
+  --coral:  #f05c3b;
+  --ink:    #0e0e12;
+  --ink2:   #1c1c24;
+  --ink3:   #2a2a36;
+  --mid:    #4a4a60;
+  --muted:  #8888a0;
+  --line:   rgba(255,255,255,0.08);
+  --card:   rgba(255,255,255,0.04);
+  --card2:  rgba(255,255,255,0.07);
+  --glass:  rgba(14,165,117,0.12);
+  --r:      12px;
+  --r2:     20px;
+}
+body{
+  background:var(--ink);
+  color:#e8e8f0;
+  font-family:'DM Sans',sans-serif;
+  font-weight:300;
+  line-height:1.7;
+  overflow-x:hidden;
+}
+::selection{background:var(--teal);color:#000}
+
+/* ── SCROLLBAR ──────────────────────────────────────────────── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--ink)}
+::-webkit-scrollbar-thumb{background:var(--teal);border-radius:4px}
+
+/* ── TYPOGRAPHY ──────────────────────────────────────────────── */
+h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;line-height:1.15;letter-spacing:-0.02em}
+code,pre,.mono{font-family:'DM Mono',monospace}
+a{color:var(--teal);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ── NAV ────────────────────────────────────────────────────── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 48px;
+  background:rgba(14,14,18,0.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--line);
+}
+.nav-logo{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:22px;
+  color:#fff;display:flex;align-items:center;gap:10px;
+}
+.nav-logo span{color:var(--teal)}
+.nav-fish{font-size:26px;line-height:1}
+.nav-links{display:flex;gap:28px;list-style:none}
+.nav-links a{
+  font-size:13px;font-weight:500;letter-spacing:0.04em;
+  color:var(--muted);text-transform:uppercase;transition:color .2s;
+}
+.nav-links a:hover{color:#fff;text-decoration:none}
+.nav-cta{
+  background:var(--teal);color:#000 !important;
+  padding:8px 20px;border-radius:40px;font-weight:500 !important;
+  transition:background .2s,transform .15s !important;
+}
+.nav-cta:hover{background:#0cc988;transform:translateY(-1px);text-decoration:none !important}
+
+/* ── HERO ───────────────────────────────────────────────────── */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;
+  padding:120px 24px 80px;
+  position:relative;overflow:hidden;
+}
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(14,165,117,0.06) 1px, transparent 1px),
+    linear-gradient(90deg,rgba(14,165,117,0.06) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,black 30%,transparent 100%);
+}
+.hero-glow{
+  position:absolute;
+  width:700px;height:700px;
+  background:radial-gradient(circle,rgba(14,165,117,0.18) 0%,transparent 70%);
+  top:50%;left:50%;transform:translate(-50%,-60%);
+  pointer-events:none;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--glass);border:1px solid rgba(14,165,117,0.3);
+  padding:6px 16px;border-radius:40px;
+  font-size:12px;font-weight:500;color:var(--teal);
+  letter-spacing:0.06em;text-transform:uppercase;
+  margin-bottom:28px;
+  animation:fadeUp .8s ease both;
+}
+.pulse{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--teal);
+  animation:pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(0.7)}}
+.hero h1{
+  font-size:clamp(52px,8vw,96px);
+  font-weight:800;
+  color:#fff;
+  margin-bottom:12px;
+  animation:fadeUp .8s .1s ease both;
+}
+.hero h1 .accent{color:var(--teal)}
+.hero-sub{
+  font-size:clamp(16px,2.5vw,22px);
+  color:var(--muted);max-width:580px;
+  margin:0 auto 40px;
+  animation:fadeUp .8s .2s ease both;
+}
+.hero-buttons{
+  display:flex;gap:14px;flex-wrap:wrap;justify-content:center;
+  animation:fadeUp .8s .3s ease both;
+  margin-bottom:64px;
+}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:14px 28px;border-radius:40px;
+  font-size:15px;font-weight:500;cursor:pointer;
+  transition:all .2s;border:none;text-decoration:none;
+}
+.btn-primary{background:var(--teal);color:#000}
+.btn-primary:hover{background:#0cc988;transform:translateY(-2px);box-shadow:0 8px 32px rgba(14,165,117,0.35);text-decoration:none}
+.btn-outline{background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.2)}
+.btn-outline:hover{background:var(--card2);transform:translateY(-2px);text-decoration:none}
+.hero-stats{
+  display:flex;gap:48px;flex-wrap:wrap;justify-content:center;
+  animation:fadeUp .8s .4s ease both;
+}
+.stat{text-align:center}
+.stat-num{
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:32px;color:#fff;display:block;
+}
+.stat-label{font-size:12px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SECTION BASE ───────────────────────────────────────────── */
+section{padding:100px 24px}
+.container{max-width:1100px;margin:0 auto}
+.section-label{
+  display:inline-block;
+  font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--teal);margin-bottom:14px;
+}
+.section-title{
+  font-size:clamp(32px,4vw,48px);color:#fff;margin-bottom:16px;
+}
+.section-desc{
+  font-size:17px;color:var(--muted);max-width:560px;line-height:1.75;
+}
+
+/* ── WHAT IS ────────────────────────────────────────────────── */
+.what-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;
+  margin-top:64px;
+}
+.what-features{display:flex;flex-direction:column;gap:20px;margin-top:40px}
+.feat{
+  display:flex;gap:16px;align-items:flex-start;
+  padding:20px;border-radius:var(--r);
+  background:var(--card);border:1px solid var(--line);
+  transition:background .2s,border-color .2s;
+}
+.feat:hover{background:var(--card2);border-color:rgba(14,165,117,0.2)}
+.feat-icon{
+  width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+  background:var(--glass);
+}
+.feat-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;color:#fff;margin-bottom:4px}
+.feat-desc{font-size:13px;color:var(--muted);line-height:1.6}
+.origin-card{
+  background:linear-gradient(135deg,rgba(14,165,117,0.12),rgba(109,74,255,0.08));
+  border:1px solid rgba(14,165,117,0.25);
+  border-radius:var(--r2);padding:32px;
+}
+.origin-card h3{font-size:20px;color:#fff;margin-bottom:12px}
+.origin-card p{font-size:14px;color:var(--muted);line-height:1.75}
+.origin-meta{
+  display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;
+}
+.tag{
+  background:rgba(255,255,255,0.06);border:1px solid var(--line);
+  padding:4px 12px;border-radius:20px;font-size:12px;color:#ccc;
+}
+.tag.green{background:rgba(14,165,117,0.15);border-color:rgba(14,165,117,0.3);color:var(--teal)}
+
+/* ── PIPELINE ───────────────────────────────────────────────── */
+.pipeline-bg{background:var(--ink2)}
+.pipeline-stages{
+  display:flex;flex-direction:column;gap:0;
+  margin-top:56px;position:relative;
+}
+.pipeline-stages::before{
+  content:'';position:absolute;left:31px;top:32px;bottom:32px;
+  width:2px;background:linear-gradient(to bottom,var(--teal),var(--purple),var(--coral));
+  border-radius:2px;
+}
+.stage{
+  display:flex;gap:28px;align-items:flex-start;
+  padding:28px 0;cursor:pointer;
+}
+.stage-num{
+  width:64px;height:64px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:18px;font-weight:500;
+  border:2px solid;position:relative;z-index:1;
+  background:var(--ink);transition:transform .2s,box-shadow .2s;
+}
+.stage:hover .stage-num{transform:scale(1.1)}
+.s1 .stage-num{color:var(--teal);border-color:var(--teal);box-shadow:0 0 0 0 rgba(14,165,117,0)}
+.s2 .stage-num{color:#5cb8ff;border-color:#5cb8ff}
+.s3 .stage-num{color:var(--purple);border-color:var(--purple)}
+.s4 .stage-num{color:var(--amber);border-color:var(--amber)}
+.s5 .stage-num{color:var(--coral);border-color:var(--coral)}
+.stage-body{flex:1;padding-top:12px}
+.stage-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:8px}
+.stage-desc{font-size:14px;color:var(--muted);line-height:1.75;max-width:640px}
+.stage-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.stag{
+  padding:3px 10px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px;
+  background:rgba(255,255,255,0.05);color:#aaa;border:1px solid rgba(255,255,255,0.08);
+}
+
+/* ── HARDWARE ───────────────────────────────────────────────── */
+.hw-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:16px;margin-top:48px;
+}
+.hw-card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:24px;transition:border-color .2s,background .2s;
+}
+.hw-card:hover{background:var(--card2);border-color:rgba(14,165,117,0.2)}
+.hw-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.hw-icon{font-size:28px}
+.hw-badge{
+  font-size:10px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;
+  padding:3px 10px;border-radius:20px;
+}
+.req{background:rgba(14,165,117,0.15);color:var(--teal);border:1px solid rgba(14,165,117,0.3)}
+.opt{background:rgba(245,158,11,0.12);color:var(--amber);border:1px solid rgba(245,158,11,0.25)}
+.hw-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff;margin-bottom:6px}
+.hw-spec{font-size:13px;color:var(--muted);line-height:1.65}
+.hw-spec strong{color:#ddd;font-weight:500}
+.hw-note{
+  grid-column:1/-1;
+  display:flex;gap:14px;align-items:flex-start;
+  background:rgba(14,165,117,0.07);
+  border:1px solid rgba(14,165,117,0.2);
+  border-left:3px solid var(--teal);
+  border-radius:0 var(--r) var(--r) 0;
+  padding:18px 20px;
+}
+.hw-note-icon{font-size:20px;margin-top:2px;flex-shrink:0}
+.hw-note-text{font-size:13px;color:var(--muted);line-height:1.7}
+.hw-note-text strong{color:#ddd}
+
+/* ── SETUP TABS ─────────────────────────────────────────────── */
+.setup-bg{background:var(--ink2)}
+.tab-nav{
+  display:flex;gap:0;
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--line);border-radius:var(--r);
+  padding:4px;margin:48px 0 36px;width:fit-content;
+}
+.tab-btn{
+  padding:10px 22px;border-radius:8px;font-size:14px;font-weight:500;
+  border:none;cursor:pointer;transition:all .2s;background:transparent;color:var(--muted);
+}
+.tab-btn.active{background:var(--teal);color:#000}
+.tab-btn:hover:not(.active){color:#fff}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.steps{display:flex;flex-direction:column;gap:16px}
+.step{
+  display:flex;gap:20px;align-items:flex-start;
+  background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r);padding:20px 24px;
+  transition:border-color .2s;
+}
+.step:hover{border-color:rgba(14,165,117,0.2)}
+.step-n{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:13px;font-weight:500;
+  background:var(--glass);color:var(--teal);border:1px solid rgba(14,165,117,0.3);
+}
+.step-body{flex:1}
+.step-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;color:#fff;margin-bottom:6px}
+.step-desc{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:10px}
+pre{
+  background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.08);
+  border-radius:8px;padding:14px 18px;overflow-x:auto;
+  font-family:'DM Mono',monospace;font-size:12px;line-height:1.8;
+  color:#b8f5d6;margin-top:8px;position:relative;
+}
+pre .comment{color:#5a7a66}
+pre .key{color:#7ed8ff}
+pre .val{color:#f5c26b}
+.copy-btn{
+  position:absolute;top:8px;right:8px;
+  background:rgba(255,255,255,0.07);border:1px solid var(--line);
+  color:var(--muted);padding:4px 10px;border-radius:6px;
+  font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;
+  transition:all .15s;
+}
+.copy-btn:hover{background:var(--glass);color:var(--teal)}
+.copy-btn.copied{color:var(--teal)}
+.tip{
+  display:flex;gap:10px;align-items:flex-start;
+  background:rgba(14,165,117,0.07);
+  border:1px solid rgba(14,165,117,0.2);
+  border-radius:8px;padding:12px 16px;margin-top:10px;
+  font-size:12.5px;color:var(--muted);line-height:1.65;
+}
+.tip strong{color:var(--teal)}
+.warn{
+  display:flex;gap:10px;align-items:flex-start;
+  background:rgba(245,158,11,0.07);
+  border:1px solid rgba(245,158,11,0.2);
+  border-radius:8px;padding:12px 16px;margin-top:10px;
+  font-size:12.5px;color:var(--muted);line-height:1.65;
+}
+.warn strong{color:var(--amber)}
+.done{
+  display:flex;gap:10px;align-items:flex-start;
+  background:rgba(14,165,117,0.1);
+  border:1px solid rgba(14,165,117,0.3);
+  border-radius:8px;padding:14px 18px;margin-top:16px;
+  font-size:14px;color:#adf0d4;font-weight:500;
+}
+
+/* ── USER GUIDE ─────────────────────────────────────────────── */
+.guide-steps{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:16px;margin-top:48px;
+}
+.g-step{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:24px;transition:all .2s;position:relative;overflow:hidden;
+}
+.g-step::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--teal),var(--purple));
+  opacity:0;transition:opacity .2s;
+}
+.g-step:hover{border-color:rgba(14,165,117,0.25);background:var(--card2)}
+.g-step:hover::before{opacity:1}
+.g-num{
+  font-family:'DM Mono',monospace;font-size:11px;
+  color:var(--teal);letter-spacing:0.1em;margin-bottom:12px;display:block;
+}
+.g-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff;margin-bottom:8px}
+.g-desc{font-size:13px;color:var(--muted);line-height:1.7}
+.prompts{
+  background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.08);
+  border-radius:var(--r);padding:20px 24px;margin-top:36px;
+}
+.prompts-title{font-family:'Syne',sans-serif;font-size:15px;color:#fff;font-weight:600;margin-bottom:14px}
+.prompt-item{
+  display:flex;gap:12px;align-items:flex-start;padding:10px 0;
+  border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;color:var(--muted);
+}
+.prompt-item:last-child{border-bottom:none}
+.prompt-item::before{content:'›';color:var(--teal);font-size:16px;flex-shrink:0;margin-top:-1px}
+
+/* ── TROUBLESHOOT ───────────────────────────────────────────── */
+.trouble-bg{background:var(--ink2)}
+.trouble-grid{
+  display:flex;flex-direction:column;gap:0;margin-top:48px;
+  border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+}
+.trouble-row{
+  display:grid;grid-template-columns:2fr 3fr 100px;
+  border-bottom:1px solid var(--line);
+  transition:background .15s;
+}
+.trouble-row:last-child{border-bottom:none}
+.trouble-row:hover{background:rgba(255,255,255,0.025)}
+.trouble-row.header{background:var(--ink3);font-family:'Syne',sans-serif;font-weight:600;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em}
+.tc{padding:16px 20px;font-size:13px;line-height:1.6;display:flex;align-items:center}
+.tc strong{color:#ddd}
+.pri{justify-content:center}
+.p-high{color:#ff6b6b}
+.p-med{color:var(--amber)}
+.p-low{color:var(--teal)}
+
+/* ── QUICK REF ──────────────────────────────────────────────── */
+.ref-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:20px;margin-top:48px;
+}
+.ref-block{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:24px;
+}
+.ref-block h3{
+  font-family:'Syne',sans-serif;font-size:15px;font-weight:700;
+  color:#fff;margin-bottom:16px;display:flex;align-items:center;gap:8px;
+}
+.ref-block h3 span{font-size:18px}
+.cmd-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);
+  gap:16px;
+}
+.cmd-row:last-child{border-bottom:none}
+.cmd-label{font-size:12px;color:var(--muted)}
+.cmd-val{
+  font-family:'DM Mono',monospace;font-size:11px;color:#b8f5d6;
+  background:rgba(0,0,0,0.3);padding:3px 8px;border-radius:4px;
+  white-space:nowrap;cursor:pointer;transition:background .15s;
+}
+.cmd-val:hover{background:rgba(14,165,117,0.2)}
+
+/* ── LINKS ──────────────────────────────────────────────────── */
+.links-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;margin-top:48px;
+}
+.link-card{
+  display:flex;align-items:center;gap:14px;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:18px 20px;transition:all .2s;text-decoration:none;
+}
+.link-card:hover{background:var(--card2);border-color:rgba(14,165,117,0.3);transform:translateY(-2px);text-decoration:none}
+.link-icon{font-size:24px;flex-shrink:0}
+.link-info{}
+.link-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:#fff;margin-bottom:2px}
+.link-url{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+
+/* ── FOOTER ─────────────────────────────────────────────────── */
+footer{
+  background:var(--ink2);border-top:1px solid var(--line);
+  padding:48px 24px;text-align:center;
+}
+.footer-logo{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:28px;color:#fff;
+  margin-bottom:12px;
+}
+.footer-logo span{color:var(--teal)}
+.footer-text{font-size:13px;color:var(--muted);line-height:1.8;max-width:500px;margin:0 auto 24px}
+.footer-badges{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.f-badge{
+  font-size:11px;color:var(--muted);
+  background:rgba(255,255,255,0.04);border:1px solid var(--line);
+  padding:4px 12px;border-radius:20px;
+}
+
+/* ── RESPONSIVE ─────────────────────────────────────────────── */
+@media(max-width:900px){
+  nav{padding:14px 20px}
+  .nav-links{display:none}
+  .what-grid{grid-template-columns:1fr}
+  .trouble-row{grid-template-columns:1fr 1fr;grid-template-rows:auto auto}
+  .trouble-row .tc:nth-child(3){grid-column:1/-1;border-top:1px solid var(--line)}
+  .trouble-row.header .tc:nth-child(3){display:none}
+}
+@media(max-width:600px){
+  section{padding:72px 16px}
+  .hero{padding:100px 16px 64px}
+  .hero-stats{gap:28px}
+  .pipeline-stages::before{left:24px}
+  .stage-num{width:48px;height:48px;font-size:14px}
+}
+
+/* ── SCROLL REVEAL ──────────────────────────────────────────── */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <span class="nav-fish">🐟</span>
+    Miro<span>Fish</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#what">What is it</a></li>
+    <li><a href="#pipeline">How it works</a></li>
+    <li><a href="#hardware">Hardware</a></li>
+    <li><a href="#setup">Setup</a></li>
+    <li><a href="#guide">User guide</a></li>
+    <li><a href="#links" class="nav-cta">Get started</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-badge"><span class="pulse"></span>#1 GitHub Global Trending · March 2026</div>
+  <h1>Predict <span class="accent">anything</span><br>with swarm AI</h1>
+  <p class="hero-sub">Upload a document. Spawn thousands of AI agents. Watch a digital world emerge and tell you what happens next.</p>
+  <div class="hero-buttons">
+    <a href="#setup" class="btn btn-primary">🚀 Get started</a>
+    <a href="#what" class="btn btn-outline">Learn how it works →</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-num">33k+</span><span class="stat-label">GitHub stars</span></div>
+    <div class="stat"><span class="stat-num">1M</span><span class="stat-label">Max agents</span></div>
+    <div class="stat"><span class="stat-num">$4.1M</span><span class="stat-label">Investment raised</span></div>
+    <div class="stat"><span class="stat-num">10</span><span class="stat-label">Days to build</span></div>
+  </div>
+</section>
+
+<!-- WHAT IS MIROFISH -->
+<section id="what">
+  <div class="container">
+    <div class="reveal">
+      <span class="section-label">Overview</span>
+      <h2 class="section-title">What is MiroFish?</h2>
+      <p class="section-desc">A next-generation AI prediction engine that builds entire digital societies to forecast real-world outcomes — before they happen.</p>
+    </div>
+    <div class="what-grid">
+      <div class="reveal">
+        <div class="what-features">
+          <div class="feat">
+            <div class="feat-icon">🌐</div>
+            <div>
+              <div class="feat-title">Swarm intelligence simulation</div>
+              <div class="feat-desc">Thousands of autonomous AI agents interact, argue, and evolve — just like real human societies.</div>
+            </div>
+          </div>
+          <div class="feat">
+            <div class="feat-icon">🧠</div>
+            <div>
+              <div class="feat-title">Knowledge graph foundation</div>
+              <div class="feat-desc">GraphRAG extracts entities and relationships from your documents to build each agent's reality.</div>
+            </div>
+          </div>
+          <div class="feat">
+            <div class="feat-icon">🔮</div>
+            <div>
+              <div class="feat-title">God's-eye view control</div>
+              <div class="feat-desc">Inject new variables mid-simulation — "What if the Fed cuts rates by 50 bps?" — and watch the world reorganize.</div>
+            </div>
+          </div>
+          <div class="feat">
+            <div class="feat-icon">📊</div>
+            <div>
+              <div class="feat-title">Structured prediction reports</div>
+              <div class="feat-desc">ReportAgent synthesizes every interaction into narrative timelines, opinion maps, and forecasts.</div>
+            </div>
+          </div>
+          <div class="feat">
+            <div class="feat-icon">🎙️</div>
+            <div>
+              <div class="feat-title">Interview individual agents</div>
+              <div class="feat-desc">Ask any simulated agent why they held a position. Explore the reasoning behind emergent behavior.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal reveal-delay-2">
+        <div class="origin-card">
+          <h3>🏆 The origin story</h3>
+          <p>Guo Hangjiang — a 20-year-old student at Beijing University of Posts and Telecommunications — built MiroFish in just 10 days using "vibe coding" powered by AI assistants. He sent a rough demo video to Chen Tianqiao (founder of Shanda Group, former richest man in China). Within 24 hours, Chen committed <strong style="color:#fff">30 million yuan (~$4.1M)</strong> to incubate the project.</p>
+          <p style="margin-top:12px">On March 7, 2026, MiroFish hit <strong style="color:#fff">#1 on GitHub's global trending list</strong> — above OpenAI, Google, and Microsoft repositories.</p>
+          <div class="origin-meta">
+            <span class="tag green">AGPL-3.0 open source</span>
+            <span class="tag">Backed by Shanda Group</span>
+            <span class="tag">Powered by OASIS (CAMEL-AI)</span>
+            <span class="tag">23 social action types</span>
+          </div>
+        </div>
+        <div style="margin-top:20px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:10px;font-family:'DM Mono',monospace;letter-spacing:0.04em">WHAT YOU PROVIDE</div>
+          <div style="font-size:14px;color:#ddd;line-height:1.8">A news article · financial report · policy draft · research paper · novel chapters · social media discussion</div>
+          <div style="height:1px;background:var(--line);margin:14px 0"></div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:10px;font-family:'DM Mono',monospace;letter-spacing:0.04em">WHAT YOU GET BACK</div>
+          <div style="font-size:14px;color:#ddd;line-height:1.8">A detailed prediction report + a fully interactive high-fidelity digital world you can query and explore.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PIPELINE -->
+<section id="pipeline" class="pipeline-bg">
+  <div class="container">
+    <div class="reveal">
+      <span class="section-label">Architecture</span>
+      <h2 class="section-title">The 5-stage pipeline</h2>
+      <p class="section-desc">Every simulation passes through five sequential stages — from raw document to interactive prediction world.</p>
+    </div>
+    <div class="pipeline-stages">
+      <div class="stage s1 reveal">
+        <div class="stage-num">01</div>
+        <div class="stage-body">
+          <div class="stage-title">Knowledge graph construction</div>
+          <div class="stage-desc">MiroFish reads your seed material using GraphRAG — Graph-based Retrieval Augmented Generation. It extracts all entities (people, organisations, events) and the relationships between them. Both individual and group memory structures are injected so agents can retain historical context across rounds.</div>
+          <div class="stage-tags">
+            <span class="stag">GraphRAG</span><span class="stag">Entity extraction</span><span class="stag">Memory injection</span><span class="stag">Zep Cloud</span>
+          </div>
+        </div>
+      </div>
+      <div class="stage s2 reveal">
+        <div class="stage-num">02</div>
+        <div class="stage-body">
+          <div class="stage-title">Environment generation</div>
+          <div class="stage-desc">From the knowledge graph, the system generates agent personas — each with a unique personality, opinion bias, reaction speed, influence level, and social history. An Environment Configuration Agent sets the simulation rules and connects agents into a social network.</div>
+          <div class="stage-tags">
+            <span class="stag">Persona generation</span><span class="stag">Social network</span><span class="stag">Env config agent</span><span class="stag">Behavioral logic</span>
+          </div>
+        </div>
+      </div>
+      <div class="stage s3 reveal">
+        <div class="stage-num">03</div>
+        <div class="stage-body">
+          <div class="stage-title">Parallel simulation execution</div>
+          <div class="stage-desc">Agents interact simultaneously on two simulated platforms: a Twitter-like feed (fast, viral, influencer-driven) and a Reddit-like forum (threaded, community-driven). The OASIS engine supports up to 1 million agents and 23 types of social actions — posting, commenting, liking, following, reposting, muting, and more.</div>
+          <div class="stage-tags">
+            <span class="stag">OASIS engine</span><span class="stag">Dual-platform</span><span class="stag">Up to 1M agents</span><span class="stag">23 social actions</span>
+          </div>
+        </div>
+      </div>
+      <div class="stage s4 reveal">
+        <div class="stage-num">04</div>
+        <div class="stage-body">
+          <div class="stage-title">Report generation</div>
+          <div class="stage-desc">After all rounds complete, the ReportAgent uses three specialised tools: <strong style="color:#ddd">InsightForge</strong> (deep sub-query search), <strong style="color:#ddd">PanoramaSearch</strong> (full historical scope), and <strong style="color:#ddd">InterviewAgents</strong> (real-time IPC interviews). It produces a structured report covering narrative evolution, key moments, and counter-movements.</div>
+          <div class="stage-tags">
+            <span class="stag">ReportAgent</span><span class="stag">InsightForge</span><span class="stag">PanoramaSearch</span><span class="stag">InterviewAgents</span>
+          </div>
+        </div>
+      </div>
+      <div class="stage s5 reveal">
+        <div class="stage-num">05</div>
+        <div class="stage-body">
+          <div class="stage-title">Deep interaction</div>
+          <div class="stage-desc">Users can talk directly with any individual agent ("What did you think about the announcement?"), ask the ReportAgent follow-up questions, or inject new variables into the simulation world from a God's-eye view — testing "what if a counter-statement is released?" scenarios in real time.</div>
+          <div class="stage-tags">
+            <span class="stag">Agent interviews</span><span class="stag">God's-eye view</span><span class="stag">Variable injection</span><span class="stag">Scenario testing</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HARDWARE -->
+<section id="hardware">
+  <div class="container">
+    <div class="reveal">
+      <span class="section-label">Before you start</span>
+      <h2 class="section-title">Hardware requirements</h2>
+      <p class="section-desc">Minimum specs to run · Recommended for full simulations · GPU notes for offline mode.</p>
+    </div>
+    <div class="hw-grid">
+      <div class="hw-card reveal">
+        <div class="hw-top"><div class="hw-icon">⚙️</div><span class="hw-badge req">Required</span></div>
+        <div class="hw-name">CPU</div>
+        <div class="hw-spec">Minimum: <strong>4-core</strong> (Intel i5 / Ryzen 5+)<br>Recommended: <strong>8-core or more</strong> for parallel agent simulation</div>
+      </div>
+      <div class="hw-card reveal reveal-delay-1">
+        <div class="hw-top"><div class="hw-icon">🧩</div><span class="hw-badge req">16 GB+</span></div>
+        <div class="hw-name">RAM</div>
+        <div class="hw-spec">Minimum: <strong>8 GB</strong><br>Recommended: <strong>16 GB or more</strong><br>Below 16 GB: add <code style="font-size:11px;background:rgba(0,0,0,0.3);padding:1px 5px;border-radius:3px">MAX_CONCURRENT_AGENTS=5</code> to .env</div>
+      </div>
+      <div class="hw-card reveal reveal-delay-2">
+        <div class="hw-top"><div class="hw-icon">🎮</div><span class="hw-badge opt">Optional</span></div>
+        <div class="hw-name">GPU</div>
+        <div class="hw-spec">Not required for cloud API mode.<br>For offline: NVIDIA GPU <strong>16 GB+ VRAM</strong><br>RTX 3090 / 4080 / A100 recommended.<br>CPU-only works but is very slow.</div>
+      </div>
+      <div class="hw-card reveal">
+        <div class="hw-top"><div class="hw-icon">💾</div><span class="hw-badge req">Required</span></div>
+        <div class="hw-name">Storage</div>
+        <div class="hw-spec">Minimum: <strong>10 GB</strong> free for code + dependencies<br>With local LLM models (Ollama): <strong>20 GB+</strong></div>
+      </div>
+      <div class="hw-card reveal reveal-delay-1">
+        <div class="hw-top"><div class="hw-icon">🖥️</div><span class="hw-badge req">Required</span></div>
+        <div class="hw-name">Operating system</div>
+        <div class="hw-spec">Windows 10 or 11<br>macOS 12 or later<br>Ubuntu 20.04 or any modern Linux</div>
+      </div>
+      <div class="hw-card reveal reveal-delay-2">
+        <div class="hw-top"><div class="hw-icon">🌐</div><span class="hw-badge req">Broadband</span></div>
+        <div class="hw-name">Internet</div>
+        <div class="hw-spec">Stable broadband required for cloud LLM API calls.<br>Offline mode: not required after initial model download.</div>
+      </div>
+      <div class="hw-note reveal">
+        <div class="hw-note-icon">🔒</div>
+        <div class="hw-note-text"><strong>Fully offline option:</strong> Use the <strong>MiroFish-Offline fork</strong> (github.com/nikmcfly/MiroFish-Offline) which replaces all cloud dependencies with Ollama (local LLM) and Neo4j Community Edition (local knowledge graph). No API keys needed. Everything runs on your own hardware with zero external calls.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SETUP -->
+<section id="setup" class="setup-bg">
+  <div class="container">
+    <div class="reveal">
+      <span class="section-label">Installation</span>
+      <h2 class="section-title">Developer setup</h2>
+      <p class="section-desc">Three ways to get MiroFish running locally — pick the one that fits your setup.</p>
+    </div>
+    <div class="tab-nav reveal">
+      <button class="tab-btn active" onclick="switchTab('cloud',this)">☁️ Cloud API</button>
+      <button class="tab-btn" onclick="switchTab('docker',this)">🐳 Docker</button>
+      <button class="tab-btn" onclick="switchTab('offline',this)">🔒 Fully offline</button>
+    </div>
+
+    <!-- CLOUD TAB -->
+    <div id="tab-cloud" class="tab-panel active">
+      <div class="tip" style="margin-bottom:20px"><strong>✅ Easiest method.</strong> Requires an LLM API key (free tiers available). No GPU needed.</div>
+      <div class="steps">
+        <div class="step reveal">
+          <div class="step-n">1</div>
+          <div class="step-body">
+            <div class="step-title">Install prerequisites</div>
+            <div class="step-desc">Make sure Node.js 18+, Python 3.11–3.12, uv, and Git are installed. Verify with:</div>
+            <pre><span class="comment"># Check each tool is installed</span>
+node -v           <span class="comment"># Must be 18+</span>
+python --version  <span class="comment"># Must be 3.11 or 3.12</span>
+uv --version      <span class="comment"># pip install uv if missing</span>
+git --version<button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+          </div>
+        </div>
+        <div class="step reveal">
+          <div class="step-n">2</div>
+          <div class="step-body">
+            <div class="step-title">Clone the repository</div>
+            <div class="step-desc">Download MiroFish source code from GitHub to your computer.</div>
+            <pre>git clone https://github.com/666ghj/MiroFish.git
+cd MiroFish<button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+          </div>
+        </div>
+        <div class="step reveal">
+          <div class="step-n">3</div>
+          <div class="step-body">
+            <div class="step-title">Copy the environment file</div>
+            <div class="step-desc">Creates your personal config from the template.</div>
+            <pre>cp .env.example .env<button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+          </div>
+        </div>
+        <div class="step reveal">
+          <div class="step-n">4</div>
+          <div class="step-body">
+            <div class="step-title">Get your API keys</div>
+            <div class="step-desc">You need two keys. Both have free tiers.<br><strong style="color:#ddd">LLM:</strong> Qwen (bailian.aliyun.com, recommended) or OpenAI (platform.openai.com)<br><strong style="color:#ddd">Memory:</strong> Zep Cloud (getzep.com) — free tier is enough for small experiments</div>
+          </div>
+        </div>
+        <div class="step reveal">
+          <div class="step-n">5</div>
+          <div class="step-body">
+            <div class="step-title">Edit .env file</div>
+            <div class="step-desc">Open .env in any text editor and fill in your keys.</div>
+            <pre><span class="comment"># LLM configuration</span>
+<span class="key">LLM_API_KEY</span>=<span class="val">your_api_key_here</span>
+<span class="key">LLM_BASE_URL</span>=<span class="val">https://dashscope.aliyuncs.com/compatible-mode/v1</span>
+<span class="key">LLM_MODEL_NAME</span>=<span class="val">qwen-plus</span>
+
+<span class="comment"># Memory system (Zep Cloud)</span>
+<span class="key">ZEP_API_KEY</span>=<span class="val">your_zep_key_here</span><button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+            <div class="tip"><strong>For OpenAI:</strong> change LLM_BASE_URL to <code style="font-size:11px">https://api.openai.com/v1</code> and LLM_MODEL_NAME to <code style="font-size:11px">gpt-4o-mini</code></div>
+          </div>
+        </div>
+        <div class="step reveal">
+          <div class="step-n">6</div>
+          <div class="step-body">
+            <div class="step-title">Install all dependencies</div>
+            <div class="step-desc">One command installs both frontend (Node.js) and backend (Python). Auto-creates a virtual environment.</div>
+            <pre>npm run setup:all<button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+            <div class="warn"><strong>⚠️ If this fails:</strong> run <code style="font-size:11px">npm cache clean --force</code> then <code style="font-size:11px">npm install --legacy-peer-deps</code></div>
+          </div>
+        </div>
+        <div class="step reveal">
+          <div class="step-n">7</div>
+          <div class="step-body">
+            <div class="step-title">Launch the platform</div>
+            <div class="step-desc">Start both frontend and backend together.</div>
+            <pre>npm run dev<button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+            <div class="tip">Start separately if needed: <code style="font-size:11px">npm run frontend</code> (port 3000) · <code style="font-size:11px">npm run backend</code> (port 5001)</div>
+          </div>
+        </div>
+        <div class="step reveal">
+          <div class="step-n">8</div>
+          <div class="step-body">
+            <div class="step-title">Open in your browser</div>
+            <pre>http://localhost:3000<button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+            <div class="done">✅ If you see the MiroFish home screen — setup is complete. You're ready to run simulations!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOCKER TAB -->
+    <div id="tab-docker" class="tab-panel">
+      <div class="tip" style="margin-bottom:20px"><strong>🐳 Containerized method.</strong> Easier dependency management. Requires Docker Desktop installed.</div>
+      <div class="steps">
+        <div class="step reveal">
+          <div class="step-n">1</div>
+          <div class="step-body">
+            <div class="step-title">Install Docker Desktop</div>
+            <div class="step-desc">Download from docker.com/products/docker-desktop. Make sure Docker is running (whale icon in taskbar) before proceeding.</div>
+          </div>
+        </div>
+        <div class="step reveal">
+          <div class="step-n">2</div>
+          <div class="step-body">
+            <div class="step-title">Clone & configure .env</div>
+            <pre>git clone https://github.com/666ghj/MiroFish.git
+cd MiroFish
+cp .env.example .env
+<span class="comment"># Edit .env with your LLM and Zep Cloud keys (same as cloud method Step 5)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+          </div>
+        </div>
+        <div class="step reveal">
+          <div class="step-n">3</div>
+          <div class="step-body">
+            <div class="step-title">Start with Docker Compose</div>
+            <div class="step-desc">First build takes 5–15 minutes as images download. Subsequent starts are instant.</div>
+            <pre>docker compose up -d<button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+            <div class="tip"><strong>Access the app at:</strong> <code style="font-size:11px">http://localhost:5001</code> in Docker mode</div>
+          </div>
+        </div>
+        <div class="step reveal">
+          <div class="step-n">4</div>
+          <div class="step-body">
+            <div class="step-title">Useful Docker commands</div>
+            <pre><span class="comment"># Stop all services</span>
+docker compose down
+
+<span class="comment"># View live logs</span>
+docker compose logs -f
+
+<span class="comment"># Rebuild after code changes</span>
+docker compose up -d --build<button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+            <div class="tip"><strong>Slow in China?</strong> Enable the commented mirror sources in docker-compose.yml to speed up image downloads.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OFFLINE TAB -->
+    <div id="tab-offline" class="tab-panel">
+      <div class="warn" style="margin-bottom:20px"><strong>⚠️ GPU with 16 GB+ VRAM strongly recommended.</strong> Use qwen2.5:14b on a 12 GB card. CPU-only works but is very slow. Uses the MiroFish-Offline fork — no API keys, no cloud, nothing leaves your machine.</div>
+      <div class="steps">
+        <div class="step reveal">
+          <div class="step-n">1</div>
+          <div class="step-body">
+            <div class="step-title">Clone the offline fork</div>
+            <pre>git clone https://github.com/nikmcfly/MiroFish-Offline.git
+cd MiroFish-Offline<button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+          </div>
+        </div>
+        <div class="step reveal">
+          <div class="step-n">2</div>
+          <div class="step-body">
+            <div class="step-title">Configure .env (no API keys needed)</div>
+            <pre>cp .env.example .env</pre>
+            <div style="height:8px"></div>
+            <pre><span class="comment"># LLM — local Ollama</span>
+<span class="key">LLM_API_KEY</span>=<span class="val">ollama</span>
+<span class="key">LLM_BASE_URL</span>=<span class="val">http://localhost:11434/v1</span>
+<span class="key">LLM_MODEL_NAME</span>=<span class="val">qwen2.5:32b</span>
+
+<span class="comment"># Neo4j — local knowledge graph</span>
+<span class="key">NEO4J_URI</span>=<span class="val">bolt://localhost:7687</span>
+<span class="key">NEO4J_USER</span>=<span class="val">neo4j</span>
+<span class="key">NEO4J_PASSWORD</span>=<span class="val">mirofish</span>
+
+<span class="comment"># Embeddings</span>
+<span class="key">EMBEDDING_MODEL</span>=<span class="val">nomic-embed-text</span>
+<span class="key">EMBEDDING_BASE_URL</span>=<span class="val">http://localhost:11434</span><button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+          </div>
+        </div>
+        <div class="step reveal">
+          <div class="step-n">3</div>
+          <div class="step-body">
+            <div class="step-title">Start all services with Docker</div>
+            <pre>docker compose up -d<button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+          </div>
+        </div>
+        <div class="step reveal">
+          <div class="step-n">4</div>
+          <div class="step-body">
+            <div class="step-title">Pull the LLM models into Ollama</div>
+            <pre><span class="comment"># Main LLM model (32B recommended, 14B for 12GB VRAM cards)</span>
+docker exec mirofish-ollama ollama pull qwen2.5:32b
+
+<span class="comment"># Embedding model (required)</span>
+docker exec mirofish-ollama ollama pull nomic-embed-text<button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+          </div>
+        </div>
+        <div class="step reveal">
+          <div class="step-n">5</div>
+          <div class="step-body">
+            <div class="step-title">Open in browser</div>
+            <pre>http://localhost:3000<button class="copy-btn" onclick="copyCode(this)">copy</button></pre>
+            <div class="done">✅ Fully offline — all computation on your hardware, zero external calls.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- USER GUIDE -->
+<section id="guide">
+  <div class="container">
+    <div class="reveal">
+      <span class="section-label">Using MiroFish</span>
+      <h2 class="section-title">Running your first simulation</h2>
+      <p class="section-desc">Once the app is open in your browser, follow these 8 steps to run a prediction.</p>
+    </div>
+    <div class="guide-steps">
+      <div class="g-step reveal">
+        <span class="g-num">STEP 01</span>
+        <div class="g-title">Click "New Prediction"</div>
+        <div class="g-desc">From the home screen, create a new simulation project. Choose the type: Public Opinion, Market Reaction, Story Prediction, or Policy Response.</div>
+      </div>
+      <div class="g-step reveal reveal-delay-1">
+        <span class="g-num">STEP 02</span>
+        <div class="g-title">Upload seed material</div>
+        <div class="g-desc">Paste or upload your document — news article, financial report, policy draft, research paper, or novel chapters. This is the reality agents will be built from.</div>
+      </div>
+      <div class="g-step reveal reveal-delay-2">
+        <span class="g-num">STEP 03</span>
+        <div class="g-title">Describe your prediction goal</div>
+        <div class="g-desc">Write your question in plain natural language. Be specific about the timeframe and what you want to observe. No special syntax needed.</div>
+      </div>
+      <div class="g-step reveal">
+        <span class="g-num">STEP 04</span>
+        <div class="g-title">Configure settings</div>
+        <div class="g-desc">Set simulation rounds (start with 20 or fewer), number of agents, and LLM model. Fewer rounds = faster and cheaper. Scale up once you know the workflow.</div>
+      </div>
+      <div class="g-step reveal reveal-delay-1">
+        <span class="g-num">STEP 05</span>
+        <div class="g-title">Start the simulation</div>
+        <div class="g-desc">Click Run. MiroFish builds a knowledge graph, generates agent personas, then runs agents across simulated Twitter and Reddit platforms simultaneously.</div>
+      </div>
+      <div class="g-step reveal reveal-delay-2">
+        <span class="g-num">STEP 06</span>
+        <div class="g-title">Wait for results</div>
+        <div class="g-desc">20 rounds · 50 agents ≈ 5–15 min. 40 rounds · 100 agents ≈ 20–45 min. Time depends on your LLM provider's speed and agent count.</div>
+      </div>
+      <div class="g-step reveal">
+        <span class="g-num">STEP 07</span>
+        <div class="g-title">Read the prediction report</div>
+        <div class="g-desc">ReportAgent synthesizes opinion shifts, dominant narratives, key influencer agents, emerging coalitions, and a final prediction summary.</div>
+      </div>
+      <div class="g-step reveal reveal-delay-1">
+        <span class="g-num">STEP 08</span>
+        <div class="g-title">Interact with the world</div>
+        <div class="g-desc">Interview any agent about their reasoning. Ask ReportAgent follow-ups. Inject new variables to test "what if?" scenarios from a God's-eye view.</div>
+      </div>
+    </div>
+    <div class="prompts reveal">
+      <div class="prompts-title">💡 Example prediction prompts to try</div>
+      <div class="prompt-item">"How will the public react to this layoff announcement over 30 days?"</div>
+      <div class="prompt-item">"Predict how this policy will be debated across different stakeholder groups."</div>
+      <div class="prompt-item">"What happens next in this story after chapter 80?"</div>
+      <div class="prompt-item">"How will investors and media respond to this product launch?"</div>
+      <div class="prompt-item">"If the Fed cuts rates by 50 bps, how will sentiment evolve over the next quarter?"</div>
+    </div>
+  </div>
+</section>
+
+<!-- TROUBLESHOOT -->
+<section id="troubleshoot" class="trouble-bg">
+  <div class="container">
+    <div class="reveal">
+      <span class="section-label">Troubleshooting</span>
+      <h2 class="section-title">Common problems & fixes</h2>
+      <p class="section-desc">Most issues come down to Python version, npm cache, or .env configuration. Here's how to resolve them.</p>
+    </div>
+    <div class="trouble-grid reveal">
+      <div class="trouble-row header">
+        <div class="tc">Problem</div>
+        <div class="tc">Fix</div>
+        <div class="tc pri">Priority</div>
+      </div>
+      <div class="trouble-row">
+        <div class="tc"><strong>npm install fails</strong></div>
+        <div class="tc">Run <code style="font-size:11px;background:rgba(0,0,0,0.4);padding:1px 6px;border-radius:3px">npm cache clean --force</code> then <code style="font-size:11px;background:rgba(0,0,0,0.4);padding:1px 6px;border-radius:3px">npm install --legacy-peer-deps</code></div>
+        <div class="tc pri"><span class="p-high">● High</span></div>
+      </div>
+      <div class="trouble-row">
+        <div class="tc"><strong>Python version error</strong></div>
+        <div class="tc">Must be exactly 3.11 or 3.12. Install pyenv: <code style="font-size:11px;background:rgba(0,0,0,0.4);padding:1px 6px;border-radius:3px">pyenv install 3.12.0</code> then <code style="font-size:11px;background:rgba(0,0,0,0.4);padding:1px 6px;border-radius:3px">pyenv local 3.12.0</code></div>
+        <div class="tc pri"><span class="p-high">● High</span></div>
+      </div>
+      <div class="trouble-row">
+        <div class="tc"><strong>API call errors</strong></div>
+        <div class="tc">Verify .env is saved correctly, check API key validity and account credits. Confirm the .env is loaded before running.</div>
+        <div class="tc pri"><span class="p-high">● High</span></div>
+      </div>
+      <div class="trouble-row">
+        <div class="tc"><strong>Simulation is very slow</strong></div>
+        <div class="tc">Reduce rounds to 20, reduce agent count, switch to a smaller model like gpt-4o-mini instead of gpt-4o.</div>
+        <div class="tc pri"><span class="p-med">● Med</span></div>
+      </div>
+      <div class="trouble-row">
+        <div class="tc"><strong>Low RAM (under 16 GB)</strong></div>
+        <div class="tc">Add <code style="font-size:11px;background:rgba(0,0,0,0.4);padding:1px 6px;border-radius:3px">MAX_CONCURRENT_AGENTS=5</code> to your .env file</div>
+        <div class="tc pri"><span class="p-med">● Med</span></div>
+      </div>
+      <div class="trouble-row">
+        <div class="tc"><strong>Wrong model name error</strong></div>
+        <div class="tc">Check your API provider's exact model string — naming formats differ per provider (e.g. qwen-plus vs qwen-turbo).</div>
+        <div class="tc pri"><span class="p-med">● Med</span></div>
+      </div>
+      <div class="trouble-row">
+        <div class="tc"><strong>Port already in use</strong></div>
+        <div class="tc">Another app is using port 3000 or 5001. Stop other apps or change the ports in your .env file.</div>
+        <div class="tc pri"><span class="p-low">● Low</span></div>
+      </div>
+      <div class="trouble-row">
+        <div class="tc"><strong>Docker build takes too long</strong></div>
+        <div class="tc">Normal on first run — images must download. Enable commented mirror sources in docker-compose.yml if in China.</div>
+        <div class="tc pri"><span class="p-low">● Low</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUICK REFERENCE -->
+<section id="quickref">
+  <div class="container">
+    <div class="reveal">
+      <span class="section-label">Quick reference</span>
+      <h2 class="section-title">Key commands at a glance</h2>
+      <p class="section-desc">Click any command to copy it to your clipboard.</p>
+    </div>
+    <div class="ref-grid">
+      <div class="ref-block reveal">
+        <h3><span>🔧</span> Setup</h3>
+        <div class="cmd-row"><span class="cmd-label">Clone main repo</span><span class="cmd-val" onclick="copyText(this)">git clone https://github.com/666ghj/MiroFish.git</span></div>
+        <div class="cmd-row"><span class="cmd-label">Clone offline fork</span><span class="cmd-val" onclick="copyText(this)">git clone https://github.com/nikmcfly/MiroFish-Offline.git</span></div>
+        <div class="cmd-row"><span class="cmd-label">Copy config template</span><span class="cmd-val" onclick="copyText(this)">cp .env.example .env</span></div>
+        <div class="cmd-row"><span class="cmd-label">Install dependencies</span><span class="cmd-val" onclick="copyText(this)">npm run setup:all</span></div>
+      </div>
+      <div class="ref-block reveal reveal-delay-1">
+        <h3><span>▶️</span> Running</h3>
+        <div class="cmd-row"><span class="cmd-label">Start both services</span><span class="cmd-val" onclick="copyText(this)">npm run dev</span></div>
+        <div class="cmd-row"><span class="cmd-label">Frontend only</span><span class="cmd-val" onclick="copyText(this)">npm run frontend</span></div>
+        <div class="cmd-row"><span class="cmd-label">Backend only</span><span class="cmd-val" onclick="copyText(this)">npm run backend</span></div>
+        <div class="cmd-row"><span class="cmd-label">Open app</span><span class="cmd-val" onclick="copyText(this)">http://localhost:3000</span></div>
+      </div>
+      <div class="ref-block reveal reveal-delay-2">
+        <h3><span>🐳</span> Docker</h3>
+        <div class="cmd-row"><span class="cmd-label">Start containers</span><span class="cmd-val" onclick="copyText(this)">docker compose up -d</span></div>
+        <div class="cmd-row"><span class="cmd-label">Stop containers</span><span class="cmd-val" onclick="copyText(this)">docker compose down</span></div>
+        <div class="cmd-row"><span class="cmd-label">View live logs</span><span class="cmd-val" onclick="copyText(this)">docker compose logs -f</span></div>
+        <div class="cmd-row"><span class="cmd-label">App URL (Docker)</span><span class="cmd-val" onclick="copyText(this)">http://localhost:5001</span></div>
+      </div>
+      <div class="ref-block reveal">
+        <h3><span>🤖</span> Ollama (offline)</h3>
+        <div class="cmd-row"><span class="cmd-label">Pull 32B model</span><span class="cmd-val" onclick="copyText(this)">docker exec mirofish-ollama ollama pull qwen2.5:32b</span></div>
+        <div class="cmd-row"><span class="cmd-label">Pull 14B model (12GB)</span><span class="cmd-val" onclick="copyText(this)">docker exec mirofish-ollama ollama pull qwen2.5:14b</span></div>
+        <div class="cmd-row"><span class="cmd-label">Pull embeddings</span><span class="cmd-val" onclick="copyText(this)">docker exec mirofish-ollama ollama pull nomic-embed-text</span></div>
+      </div>
+      <div class="ref-block reveal reveal-delay-1">
+        <h3><span>🔑</span> .env keys needed</h3>
+        <div class="cmd-row"><span class="cmd-label">LLM API (Qwen)</span><span class="cmd-val" onclick="copyText(this)">LLM_API_KEY=</span></div>
+        <div class="cmd-row"><span class="cmd-label">LLM base URL</span><span class="cmd-val" onclick="copyText(this)">LLM_BASE_URL=</span></div>
+        <div class="cmd-row"><span class="cmd-label">LLM model name</span><span class="cmd-val" onclick="copyText(this)">LLM_MODEL_NAME=qwen-plus</span></div>
+        <div class="cmd-row"><span class="cmd-label">Zep Cloud memory</span><span class="cmd-val" onclick="copyText(this)">ZEP_API_KEY=</span></div>
+      </div>
+      <div class="ref-block reveal reveal-delay-2">
+        <h3><span>🩹</span> Fix commands</h3>
+        <div class="cmd-row"><span class="cmd-label">Clear npm cache</span><span class="cmd-val" onclick="copyText(this)">npm cache clean --force</span></div>
+        <div class="cmd-row"><span class="cmd-label">Legacy install</span><span class="cmd-val" onclick="copyText(this)">npm install --legacy-peer-deps</span></div>
+        <div class="cmd-row"><span class="cmd-label">Install uv</span><span class="cmd-val" onclick="copyText(this)">pip install uv</span></div>
+        <div class="cmd-row"><span class="cmd-label">Low RAM mode</span><span class="cmd-val" onclick="copyText(this)">MAX_CONCURRENT_AGENTS=5</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LINKS -->
+<section id="links" style="padding-bottom:60px">
+  <div class="container">
+    <div class="reveal">
+      <span class="section-label">Resources</span>
+      <h2 class="section-title">Useful links</h2>
+      <p class="section-desc">Everything you need to get started, contribute, or go deeper.</p>
+    </div>
+    <div class="links-grid">
+      <a class="link-card reveal" href="https://github.com/666ghj/MiroFish" target="_blank">
+        <div class="link-icon">🐟</div>
+        <div class="link-info"><div class="link-name">MiroFish (main repo)</div><div class="link-url">github.com/666ghj/MiroFish</div></div>
+      </a>
+      <a class="link-card reveal reveal-delay-1" href="https://github.com/nikmcfly/MiroFish-Offline" target="_blank">
+        <div class="link-icon">🔒</div>
+        <div class="link-info"><div class="link-name">MiroFish Offline fork</div><div class="link-url">github.com/nikmcfly/MiroFish-Offline</div></div>
+      </a>
+      <a class="link-card reveal reveal-delay-2" href="https://666ghj.github.io/mirofish-demo/" target="_blank">
+        <div class="link-icon">🌐</div>
+        <div class="link-info"><div class="link-name">Live demo</div><div class="link-url">666ghj.github.io/mirofish-demo</div></div>
+      </a>
+      <a class="link-card reveal" href="https://bailian.aliyun.com" target="_blank">
+        <div class="link-icon">🤖</div>
+        <div class="link-info"><div class="link-name">Qwen API (recommended LLM)</div><div class="link-url">bailian.aliyun.com</div></div>
+      </a>
+      <a class="link-card reveal reveal-delay-1" href="https://getzep.com" target="_blank">
+        <div class="link-icon">🧠</div>
+        <div class="link-info"><div class="link-name">Zep Cloud (agent memory)</div><div class="link-url">getzep.com</div></div>
+      </a>
+      <a class="link-card reveal reveal-delay-2" href="https://ollama.com" target="_blank">
+        <div class="link-icon">💻</div>
+        <div class="link-info"><div class="link-name">Ollama (local LLM runner)</div><div class="link-url">ollama.com</div></div>
+      </a>
+      <a class="link-card reveal" href="https://docker.com/products/docker-desktop" target="_blank">
+        <div class="link-icon">🐳</div>
+        <div class="link-info"><div class="link-name">Docker Desktop</div><div class="link-url">docker.com/products/docker-desktop</div></div>
+      </a>
+      <a class="link-card reveal reveal-delay-1" href="https://platform.openai.com" target="_blank">
+        <div class="link-icon">✨</div>
+        <div class="link-info"><div class="link-name">OpenAI API (alternative LLM)</div><div class="link-url">platform.openai.com</div></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">🐟 Miro<span>Fish</span></div>
+  <p class="footer-text">Open-source swarm intelligence prediction engine. Released under AGPL-3.0. Built by Guo Hangjiang. Backed by Shanda Group. Powered by OASIS (CAMEL-AI).</p>
+  <div class="footer-badges">
+    <span class="f-badge">AGPL-3.0 License</span>
+    <span class="f-badge">Python 3.11–3.12</span>
+    <span class="f-badge">Node.js 18+</span>
+    <span class="f-badge">Up to 1M agents</span>
+    <span class="f-badge">23 social actions</span>
+  </div>
+</footer>
+
+<script>
+// ── TAB SWITCHING ────────────────────────────────────────────
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── COPY CODE BLOCK ──────────────────────────────────────────
+function copyCode(btn) {
+  const pre = btn.parentElement;
+  const text = Array.from(pre.childNodes)
+    .filter(n => n.nodeType === 3 || (n.nodeType === 1 && !n.classList.contains('copy-btn')))
+    .map(n => n.textContent).join('').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ── COPY SINGLE VALUE ────────────────────────────────────────
+function copyText(el) {
+  navigator.clipboard.writeText(el.textContent.trim()).then(() => {
+    const orig = el.textContent;
+    el.textContent = 'copied!';
+    setTimeout(() => { el.textContent = orig; }, 1500);
+  });
+}
+
+// ── SCROLL REVEAL ────────────────────────────────────────────
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── ACTIVE NAV LINK ──────────────────────────────────────────
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) cur = s.id; });
+  navLinks.forEach(a => {
+    a.style.color = a.getAttribute('href') === '#'+cur ? '#fff' : '';
+  });
+}, { passive: true });
+</script>
+</body>
+</html>

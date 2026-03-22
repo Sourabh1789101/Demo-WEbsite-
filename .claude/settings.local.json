@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp \"i:/New folder \\(3\\)/Js file by Claude/Complete_Claw_Ecosystem_Guide_2026.html\" \"i:/New folder \\(3\\)/Js file by Claude/my-docs-app/public/claw-ecosystem-2026.html\")",
+      "Bash(cp \"i:/New folder \\(3\\)/Js file by Claude/Complete_Claw_Ecosystem_Guide_2026 \\(1\\).html\" \"i:/New folder \\(3\\)/Js file by Claude/my-docs-app/public/claw-ecosystem-2026-v2.html\")",
+      "Bash(cp \"i:/New folder \\(3\\)/Js file by Claude/mirofish_website.html\" \"i:/New folder \\(3\\)/Js file by Claude/my-docs-app/public/mirofish-website.html\")",
+      "Bash(ls \"i:/New folder \\(3\\)/Js file by Claude/my-docs-app/public/\")",
+      "Bash(npm run:*)",
+      "Bash(ls -la \"i:\\\\New folder \\(3\\)\\\\Js file by Claude\\\\my-docs-app\")",
+      "Bash(ls -la \"i:\\\\New folder \\(3\\)\\\\Js file by Claude\\\\my-docs-app\\\\src\\\\docs\")",
+      "Bash(ls -la \"i:\\\\New folder \\(3\\)\\\\Js file by Claude\\\\my-docs-app\\\\src\\\\assets\")"
+    ]
+  }
+}

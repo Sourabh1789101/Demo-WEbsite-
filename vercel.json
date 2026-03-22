@@ -1,6 +1,10 @@
 {
   "version": 2,
+  "framework": "vite",
   "installCommand": "cd my-docs-app && npm install",
   "buildCommand": "cd my-docs-app && npm run build",
-  "outputDirectory": "my-docs-app/dist"
+  "outputDirectory": "my-docs-app/dist",
+  "rewrites": [
+    { "source": "/((?!.*\\.html$).*)", "destination": "/index.html" }
+  ]
 }
