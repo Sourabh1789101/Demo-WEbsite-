@@ -1,13 +1,1092 @@
-import React from 'react'
+// @ts-nocheck
+import React, { useState, useEffect } from 'react';
 
-const ClawEcosystem2026: React.FC = () => (
-  <div className="w-full h-full bg-white">
-    <iframe
-      title="Claw Ecosystem Guide 2026"
-      src="/claw-ecosystem-2026.html"
-      className="w-full h-full block border-0"
-    />
-  </div>
-)
+const cssString = `
+/* ==============================
+   CSS VARIABLES — LIGHT & DARK
+   ============================== */
+:root {
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --font-display: 'Playfair Display', serif;
+  --sidebar-w: 280px;
+  --topbar-h: 56px;
+  --content-max: 780px;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-export default ClawEcosystem2026
+[data-theme="light"] {
+  --bg-page: #FAFAF8;
+  --bg-sidebar: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-code: #F4F1EC;
+  --bg-code-block: #1E1E2E;
+  --bg-topbar: rgba(255,255,255,0.88);
+  --bg-callout-info: #EEF4FF;
+  --bg-callout-warn: #FFF8EE;
+  --bg-callout-danger: #FFF0F0;
+  --bg-callout-tip: #EEFBF3;
+  --bg-badge: #F0EDFF;
+  --border: #E8E5DE;
+  --border-light: #F0EDE6;
+  --text-primary: #1A1A1A;
+  --text-secondary: #5C5C5C;
+  --text-tertiary: #8A8A8A;
+  --text-code: #1E1E2E;
+  --text-code-block: #CDD6F4;
+  --accent: #5B4AE4;
+  --accent-hover: #4A39D3;
+  --accent-bg: #F0EDFF;
+  --accent-text: #4338CA;
+  --callout-info-border: #C7D7FE;
+  --callout-warn-border: #FDE68A;
+  --callout-danger-border: #FECACA;
+  --callout-tip-border: #A7F3D0;
+  --callout-info-icon: #3B82F6;
+  --callout-warn-icon: #F59E0B;
+  --callout-danger-icon: #EF4444;
+  --callout-tip-icon: #10B981;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+  --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.06);
+  --sidebar-active: #F5F3FF;
+  --sidebar-hover: #F9F8FE;
+  --tag-rust: #FFF1E6; --tag-rust-text: #C2410C;
+  --tag-ts: #EFF6FF; --tag-ts-text: #1D4ED8;
+  --tag-go: #ECFDF5; --tag-go-text: #047857;
+  --tag-py: #FFFBEB; --tag-py-text: #B45309;
+  --tag-cloud: #F5F3FF; --tag-cloud-text: #6D28D9;
+  --tag-local: #F0FDFA; --tag-local-text: #0F766E;
+  --table-header: #F8F7F4;
+  --table-stripe: #FCFBF9;
+  --scroll-thumb: #D4D0C8;
+}
+
+[data-theme="dark"] {
+  --bg-page: #0F0F14;
+  --bg-sidebar: #16161E;
+  --bg-card: #1C1C28;
+  --bg-code: #24243A;
+  --bg-code-block: #12121C;
+  --bg-topbar: rgba(15,15,20,0.92);
+  --bg-callout-info: #161B2E;
+  --bg-callout-warn: #1E1A14;
+  --bg-callout-danger: #1E1416;
+  --bg-callout-tip: #141E1A;
+  --bg-badge: #24203E;
+  --border: #2A2A3C;
+  --border-light: #222234;
+  --text-primary: #EAEAF0;
+  --text-secondary: #A0A0B4;
+  --text-tertiary: #6C6C84;
+  --text-code: #CDD6F4;
+  --text-code-block: #CDD6F4;
+  --accent: #8B7CF8;
+  --accent-hover: #A09AFF;
+  --accent-bg: #24203E;
+  --accent-text: #B4ADFF;
+  --callout-info-border: #2E3A5E;
+  --callout-warn-border: #3E3420;
+  --callout-danger-border: #3E2024;
+  --callout-tip-border: #1E3E2A;
+  --callout-info-icon: #60A5FA;
+  --callout-warn-icon: #FBBF24;
+  --callout-danger-icon: #F87171;
+  --callout-tip-icon: #34D399;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.4);
+  --sidebar-active: #1E1E32;
+  --sidebar-hover: #1A1A2C;
+  --tag-rust: #2A1F18; --tag-rust-text: #FB923C;
+  --tag-ts: #161E2E; --tag-ts-text: #60A5FA;
+  --tag-go: #142420; --tag-go-text: #34D399;
+  --tag-py: #221E14; --tag-py-text: #FBBF24;
+  --tag-cloud: #1E1A2E; --tag-cloud-text: #A78BFA;
+  --tag-local: #141E1E; --tag-local-text: #2DD4BF;
+  --table-header: #1A1A28;
+  --table-stripe: #16161F;
+  --scroll-thumb: #3A3A4E;
+}
+
+/* ==============================
+   RESET & BASE
+   ============================== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--topbar-h) + 24px); }
+body {
+  font-family: var(--font-body);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-size: 15.5px;
+  line-height: 1.72;
+  -webkit-font-smoothing: antialiased;
+  transition: background var(--transition), color var(--transition);
+}
+a { color: var(--accent); text-decoration: none; transition: color var(--transition); }
+a:hover { color: var(--accent-hover); }
+
+/* ==============================
+   TOP BAR
+   ============================== */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--topbar-h);
+  background: var(--bg-topbar);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 24px;
+  transition: background var(--transition), border var(--transition);
+}
+.topbar-brand {
+  font-family: var(--font-display); font-weight: 800; font-size: 1.15rem;
+  color: var(--text-primary); display: flex; align-items: center; gap: 10px;
+}
+.topbar-brand .lobster { font-size: 1.3rem; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+
+/* Theme Toggle */
+.theme-toggle {
+  width: 52px; height: 28px; border-radius: 14px;
+  background: var(--border); border: none; cursor: pointer;
+  position: relative; transition: background var(--transition);
+  display: flex; align-items: center; padding: 0 4px;
+}
+.theme-toggle::after {
+  content: ''; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--bg-card); position: absolute; left: 4px;
+  transition: transform var(--transition), background var(--transition);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+[data-theme="dark"] .theme-toggle { background: var(--accent); }
+[data-theme="dark"] .theme-toggle::after { transform: translateX(24px); }
+.theme-toggle .icon-sun, .theme-toggle .icon-moon { font-size: 12px; z-index: 1; }
+.theme-toggle .icon-sun { margin-right: auto; margin-left: 2px; }
+.theme-toggle .icon-moon { margin-left: auto; margin-right: 2px; }
+[data-theme="light"] .theme-toggle .icon-moon { opacity: 0.3; }
+[data-theme="dark"] .theme-toggle .icon-sun { opacity: 0.3; }
+
+/* Mobile hamburger */
+.hamburger { display: none; background: none; border: none; cursor: pointer; color: var(--text-primary); font-size: 1.4rem; padding: 4px; }
+
+/* ==============================
+   SIDEBAR
+   ============================== */
+.sidebar {
+  position: fixed; top: var(--topbar-h); left: 0; bottom: 0;
+  width: var(--sidebar-w); overflow-y: auto;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  padding: 20px 0;
+  transition: background var(--transition), border var(--transition), transform var(--transition);
+  z-index: 90;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 2px; }
+
+.sidebar-section { padding: 0 16px; margin-bottom: 24px; }
+.sidebar-section-title {
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 1.2px;
+  text-transform: uppercase; color: var(--text-tertiary);
+  padding: 0 12px; margin-bottom: 6px;
+}
+
+.sidebar a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 12px; border-radius: var(--radius-sm);
+  font-size: 0.875rem; font-weight: 400;
+  color: var(--text-secondary); transition: all var(--transition);
+  text-decoration: none;
+}
+.sidebar a:hover { background: var(--sidebar-hover); color: var(--text-primary); }
+.sidebar a.active { background: var(--sidebar-active); color: var(--accent); font-weight: 600; }
+.sidebar a .nav-icon { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+.sidebar a .nav-badge {
+  margin-left: auto; font-size: 0.65rem; font-weight: 600;
+  padding: 1px 7px; border-radius: 10px;
+  background: var(--bg-badge); color: var(--accent-text);
+}
+
+/* ==============================
+   MAIN CONTENT
+   ============================== */
+.main {
+  margin-left: var(--sidebar-w);
+  padding: calc(var(--topbar-h) + 40px) 48px 80px 48px;
+  min-height: 100vh;
+  transition: margin var(--transition);
+}
+.content { max-width: var(--content-max); margin: 0 auto; }
+
+/* ==============================
+   HERO
+   ============================== */
+.hero-section {
+  padding-bottom: 48px;
+  margin-bottom: 48px;
+  border-bottom: 1px solid var(--border);
+}
+.hero-section .breadcrumb {
+  font-size: 0.78rem; color: var(--text-tertiary); margin-bottom: 16px;
+  display: flex; align-items: center; gap: 6px;
+}
+.hero-section h1 {
+  font-family: var(--font-display); font-weight: 900;
+  font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.15;
+  letter-spacing: -0.5px;
+  margin-bottom: 16px;
+}
+.hero-section .hero-desc {
+  font-size: 1.08rem; color: var(--text-secondary); max-width: 600px; line-height: 1.7;
+}
+.hero-section .hero-meta {
+  display: flex; flex-wrap: wrap; gap: 16px; margin-top: 20px;
+}
+.hero-section .meta-pill {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.8rem; font-weight: 500; color: var(--text-tertiary);
+  background: var(--bg-card); border: 1px solid var(--border);
+  padding: 5px 14px; border-radius: 20px;
+}
+.hero-section .meta-pill .pill-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+}
+
+/* ==============================
+   TYPOGRAPHY
+   ============================== */
+.content h2 {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: 1.65rem; margin: 56px 0 12px; line-height: 1.25;
+  letter-spacing: -0.3px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+.content h2:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+.content h3 {
+  font-size: 1.15rem; font-weight: 700; margin: 32px 0 10px;
+  color: var(--text-primary);
+}
+.content h4 {
+  font-size: 0.95rem; font-weight: 700; margin: 20px 0 8px;
+  color: var(--accent-text);
+}
+.content p { margin-bottom: 16px; }
+.content > ul, .content > ol { margin: 8px 0 20px 20px; }
+.content li { margin-bottom: 6px; }
+.content strong { font-weight: 600; }
+
+/* Inline code */
+code {
+  font-family: var(--font-mono); font-size: 0.87em;
+  background: var(--bg-code); color: var(--text-code);
+  padding: 2px 7px; border-radius: 4px;
+  transition: background var(--transition), color var(--transition);
+}
+
+/* Code blocks */
+pre {
+  background: var(--bg-code-block); color: var(--text-code-block);
+  border-radius: var(--radius); padding: 18px 22px;
+  overflow-x: auto; margin: 12px 0 22px;
+  font-size: 0.84rem; line-height: 1.65;
+  border: 1px solid var(--border-light);
+  transition: background var(--transition), border var(--transition);
+}
+pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+
+/* ==============================
+   CALLOUTS
+   ============================== */
+.callout {
+  border-radius: var(--radius); padding: 18px 20px;
+  margin: 16px 0 24px; display: flex; gap: 14px;
+  font-size: 0.92rem; line-height: 1.65;
+  transition: background var(--transition), border var(--transition);
+}
+.callout-icon { font-size: 1.15rem; flex-shrink: 0; margin-top: 2px; }
+.callout-body { flex: 1; }
+.callout-body strong { display: block; margin-bottom: 4px; font-size: 0.88rem; font-weight: 700; }
+
+.callout.info { background: var(--bg-callout-info); border-left: 3px solid var(--callout-info-border); }
+.callout.info .callout-icon { color: var(--callout-info-icon); }
+.callout.warn { background: var(--bg-callout-warn); border-left: 3px solid var(--callout-warn-border); }
+.callout.warn .callout-icon { color: var(--callout-warn-icon); }
+.callout.danger { background: var(--bg-callout-danger); border-left: 3px solid var(--callout-danger-border); }
+.callout.danger .callout-icon { color: var(--callout-danger-icon); }
+.callout.tip { background: var(--bg-callout-tip); border-left: 3px solid var(--callout-tip-border); }
+.callout.tip .callout-icon { color: var(--callout-tip-icon); }
+
+/* ==============================
+   CARDS
+   ============================== */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin: 16px 0 24px; }
+.card-grid-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+
+.card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition);
+}
+.card:hover { box-shadow: var(--shadow-card-hover); border-color: var(--accent); }
+.card h4 { margin-top: 0; }
+.card p:last-child { margin-bottom: 0; }
+
+/* ==============================
+   TAGS
+   ============================== */
+.tag {
+  display: inline-block; padding: 2px 10px; border-radius: 10px;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.3px;
+  transition: background var(--transition), color var(--transition);
+}
+.tag.rust { background: var(--tag-rust); color: var(--tag-rust-text); }
+.tag.ts { background: var(--tag-ts); color: var(--tag-ts-text); }
+.tag.go { background: var(--tag-go); color: var(--tag-go-text); }
+.tag.py { background: var(--tag-py); color: var(--tag-py-text); }
+.tag.cloud { background: var(--tag-cloud); color: var(--tag-cloud-text); }
+.tag.local { background: var(--tag-local); color: var(--tag-local-text); }
+
+/* ==============================
+   TABLES
+   ============================== */
+.table-wrap { overflow-x: auto; margin: 16px 0 24px; border-radius: var(--radius); border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+th { text-align: left; padding: 11px 16px; background: var(--table-header); font-weight: 600; font-size: 0.82rem; color: var(--text-secondary); border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 11px 16px; border-bottom: 1px solid var(--border-light); }
+tr:nth-child(even) td { background: var(--table-stripe); }
+tr:last-child td { border-bottom: none; }
+
+/* ==============================
+   STEPS
+   ============================== */
+.steps { counter-reset: step; list-style: none; margin: 16px 0 24px; padding: 0; }
+.steps li {
+  counter-increment: step; position: relative;
+  padding: 16px 16px 16px 56px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 10px;
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition);
+}
+.steps li::before {
+  content: counter(step); position: absolute; left: 16px; top: 16px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  font-weight: 700; font-size: 0.82rem;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ==============================
+   FILE TREE
+   ============================== */
+.file-tree {
+  background: var(--bg-code-block); color: var(--text-code-block);
+  border-radius: var(--radius); padding: 20px 24px;
+  font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.9;
+  overflow-x: auto; margin: 14px 0 24px;
+  border: 1px solid var(--border-light);
+}
+.file-tree .dir { color: #89B4FA; font-weight: 500; }
+.file-tree .file { color: #CDD6F4; }
+.file-tree .cmt { color: #585B70; font-style: italic; }
+
+/* ==============================
+   FLOW DIAGRAM
+   ============================== */
+.flow-box {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px;
+  font-family: var(--font-mono); font-size: 0.84rem;
+  line-height: 2.2; overflow-x: auto; margin: 16px 0 24px;
+  text-align: center; white-space: pre;
+}
+.flow-box .a { color: var(--accent); font-weight: 600; }
+.flow-box .b { color: var(--callout-tip-icon); font-weight: 600; }
+.flow-box .c { color: var(--callout-warn-icon); font-weight: 600; }
+
+/* ==============================
+   DIVIDER
+   ============================== */
+.section-divider {
+  height: 1px; background: var(--border); margin: 48px 0 0;
+}
+
+/* ==============================
+   FOOTER
+   ============================== */
+.doc-footer {
+  margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--border);
+  font-size: 0.82rem; color: var(--text-tertiary); text-align: center;
+}
+
+/* ==============================
+   MOBILE RESPONSIVE
+   ============================== */
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.15); }
+  .main { margin-left: 0; padding: calc(var(--topbar-h) + 24px) 20px 60px 20px; }
+  .hamburger { display: block; }
+  .card-grid { grid-template-columns: 1fr; }
+  .card-grid-2 { grid-template-columns: 1fr; }
+}
+.overlay { display: none; position: fixed; inset: 0; z-index: 80; background: rgba(0,0,0,0.3); }
+.overlay.show { display: block; }
+
+/* Scroll-aware active link highlight */
+.sidebar a.watching { color: var(--text-primary); }
+
+/* Security steps list spacing */
+.security-steps { margin-top: 8px; }
+`;
+
+export default function ClawEcosystem2026() {
+  const [theme, setTheme] = useState('light');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('overview');
+
+  // Restore saved theme on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('claw-docs-theme');
+    if (saved) {
+      setTheme(saved);
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setTheme('dark');
+    }
+  }, []);
+
+  // Apply theme to documentElement
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    const next = theme === 'light' ? 'dark' : 'light';
+    setTheme(next);
+    localStorage.setItem('claw-docs-theme', next);
+  };
+
+  const toggleSidebar = () => {
+    setSidebarOpen(prev => !prev);
+  };
+
+  const closeSidebar = () => {
+    if (window.innerWidth <= 900) {
+      setSidebarOpen(false);
+    }
+  };
+
+  // Active link tracking on scroll
+  useEffect(() => {
+    const updateActive = () => {
+      const sections = document.querySelectorAll('h2[id], .hero-section[id]');
+      let current = '';
+      sections.forEach(section => {
+        const { top } = section.getBoundingClientRect();
+        if (top < 120) current = section.id || section.getAttribute('id') || '';
+      });
+      if (current) setActiveSection(current);
+    };
+    window.addEventListener('scroll', updateActive, { passive: true });
+    updateActive();
+    return () => window.removeEventListener('scroll', updateActive);
+  }, []);
+
+  return (
+    <>
+      <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700;800;900&display=swap"
+        rel="stylesheet"
+      />
+      <style>{cssString}</style>
+
+      {/* TOP BAR */}
+      <header className="topbar">
+        <button type="button" className="hamburger" onClick={toggleSidebar} aria-label="Menu">☰</button>
+        <div className="topbar-brand">
+          <span className="lobster">🦞</span> Claw Ecosystem Docs
+        </div>
+        <div className="topbar-right">
+          <button type="button" className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+            <span className="icon-sun">☀️</span>
+            <span className="icon-moon">🌙</span>
+          </button>
+        </div>
+      </header>
+
+      {/* OVERLAY for mobile sidebar */}
+      <div
+        className={`overlay${sidebarOpen ? ' show' : ''}`}
+        id="overlay"
+        onClick={toggleSidebar}
+      />
+
+      {/* SIDEBAR */}
+      <nav className={`sidebar${sidebarOpen ? ' open' : ''}`} id="sidebar">
+        <div className="sidebar-section">
+          <div className="sidebar-section-title">Getting Started</div>
+          <a href="#overview" className={activeSection === 'overview' ? 'active' : ''} onClick={closeSidebar}><span className="nav-icon">📖</span> Overview</a>
+          <a href="#how-it-works" className={activeSection === 'how-it-works' ? 'active' : ''} onClick={closeSidebar}><span className="nav-icon">⚙️</span> How It Works</a>
+          <a href="#message-flow" className={activeSection === 'message-flow' ? 'active' : ''} onClick={closeSidebar}><span className="nav-icon">🔄</span> Message Flow</a>
+          <a href="#workspace" className={activeSection === 'workspace' ? 'active' : ''} onClick={closeSidebar}><span className="nav-icon">📁</span> Workspace Files</a>
+        </div>
+
+        <div className="sidebar-section">
+          <div className="sidebar-section-title">Installation</div>
+          <a href="#openclaw-setup" className={activeSection === 'openclaw-setup' ? 'active' : ''} onClick={closeSidebar}><span className="nav-icon">🦞</span> OpenClaw <span className="nav-badge">Original</span></a>
+          <a href="#zeroclaw-setup" className={activeSection === 'zeroclaw-setup' ? 'active' : ''} onClick={closeSidebar}><span className="nav-icon">🦀</span> ZeroClaw <span className="nav-badge">Rust</span></a>
+          <a href="#picoclaw-setup" className={activeSection === 'picoclaw-setup' ? 'active' : ''} onClick={closeSidebar}><span className="nav-icon">🦐</span> PicoClaw <span className="nav-badge">Go</span></a>
+          <a href="#nanoclaw-setup" className={activeSection === 'nanoclaw-setup' ? 'active' : ''} onClick={closeSidebar}><span className="nav-icon">🔒</span> NanoClaw</a>
+          <a href="#nanobot-setup" className={activeSection === 'nanobot-setup' ? 'active' : ''} onClick={closeSidebar}><span className="nav-icon">🤖</span> NanoBot <span className="nav-badge">Python</span></a>
+        </div>
+
+        <div className="sidebar-section">
+          <div className="sidebar-section-title">Configuration</div>
+          <a href="#channels" className={activeSection === 'channels' ? 'active' : ''} onClick={closeSidebar}><span className="nav-icon">💬</span> Channels</a>
+          <a href="#skills" className={activeSection === 'skills' ? 'active' : ''} onClick={closeSidebar}><span className="nav-icon">🛠️</span> Skills &amp; Tools</a>
+          <a href="#models" className={activeSection === 'models' ? 'active' : ''} onClick={closeSidebar}><span className="nav-icon">🧠</span> Model Setup</a>
+        </div>
+
+        <div className="sidebar-section">
+          <div className="sidebar-section-title">Chinese Variants</div>
+          <a href="#chinese-variants" className={activeSection === 'chinese-variants' ? 'active' : ''} onClick={closeSidebar}><span className="nav-icon">🇨🇳</span> AutoClaw, QClaw…</a>
+          <a href="#memubot" className={activeSection === 'memubot' ? 'active' : ''} onClick={closeSidebar}><span className="nav-icon">💡</span> memUBot &amp; Others</a>
+        </div>
+
+        <div className="sidebar-section">
+          <div className="sidebar-section-title">Reference</div>
+          <a href="#comparison" className={activeSection === 'comparison' ? 'active' : ''} onClick={closeSidebar}><span className="nav-icon">📊</span> Comparison Table</a>
+          <a href="#security" className={activeSection === 'security' ? 'active' : ''} onClick={closeSidebar}><span className="nav-icon">🛡️</span> Security Guide</a>
+          <a href="#costs" className={activeSection === 'costs' ? 'active' : ''} onClick={closeSidebar}><span className="nav-icon">💰</span> Cost Guide</a>
+          <a href="#faq" className={activeSection === 'faq' ? 'active' : ''} onClick={closeSidebar}><span className="nav-icon">❓</span> FAQ</a>
+        </div>
+      </nav>
+
+      {/* MAIN CONTENT */}
+      <main className="main">
+        <div className="content">
+
+          {/* ==================== HERO ==================== */}
+          <div className="hero-section" id="overview">
+            <div className="breadcrumb">Docs <span>›</span> User Manual</div>
+            <h1>The Complete Claw Ecosystem Guide</h1>
+            <p className="hero-desc">Everything you need to understand, install, configure, and use OpenClaw and all its variants — from architecture to daily operation.</p>
+            <div className="hero-meta">
+              <span className="meta-pill"><span className="pill-dot"></span> Updated March 2026</span>
+              <span className="meta-pill"><span className="pill-dot"></span> 14+ Products Covered</span>
+              <span className="meta-pill"><span className="pill-dot"></span> Light &amp; Dark Mode</span>
+            </div>
+          </div>
+
+          {/* ==================== WHAT IS OPENCLAW ==================== */}
+          <h2>What is OpenClaw?</h2>
+
+          <p><strong>OpenClaw</strong> is an open-source, self-hosted personal AI assistant that runs on your own machine and connects to messaging apps you already use — WhatsApp, Telegram, Discord, Slack, iMessage, and 20+ others.</p>
+
+          <p>Unlike ChatGPT which forgets you when you close the tab, OpenClaw runs as a <strong>persistent background daemon</strong>. It can browse the web, read/write files, run shell commands, automate browsers, schedule cron jobs, and message you proactively — while remembering your preferences across months.</p>
+
+          <div className="callout info">
+            <span className="callout-icon">ℹ️</span>
+            <div className="callout-body">
+              <strong>History</strong>
+              Originally called MoltBot → ClawdBot → OpenClaw (Jan 2026). Created by Peter Steinberger. 310,000+ GitHub stars. MIT licensed. The founder joined OpenAI in Feb 2026; the project moved to an open-source foundation.
+            </div>
+          </div>
+
+          <div className="card-grid">
+            <div className="card"><h4>🌐 22+ Channels</h4><p>WhatsApp, Telegram, Discord, Slack, Signal, iMessage, Teams, Matrix, and more.</p></div>
+            <div className="card"><h4>🧠 53 Skills</h4><p>Calendar, email, web scraping, code review, smart home, and a community marketplace.</p></div>
+            <div className="card"><h4>🔧 26 Core Tools</h4><p>Bash, browser automation, file ops, cron scheduling, memory management.</p></div>
+            <div className="card"><h4>🤖 Model-Agnostic</h4><p>Claude, GPT, Gemini, DeepSeek, or fully offline local models via Ollama.</p></div>
+          </div>
+
+          <h3>The 3 Product Lines</h3>
+          <p>Every product from the "Adopt a Claw" page falls into one of these categories:</p>
+
+          <div className="card-grid">
+            <div className="card">
+              <h4>1. Self-Hosted (Native)</h4>
+              <p><strong>OpenClaw, ZeroClaw, PicoClaw, NanoClaw, NanoBot</strong></p>
+              <p>Full control. Install on your machine. Requires terminal comfort.</p>
+              <p><span className="tag local">Local-First</span> <span className="tag ts">Open Source</span></p>
+            </div>
+            <div className="card">
+              <h4>2. One-Click Desktop</h4>
+              <p><strong>QClaw, AutoClaw, WorkBuddy, EasyClaw</strong></p>
+              <p>Download → install → done. GUI wrappers with pre-configured skills.</p>
+              <p><span className="tag local">Local</span> <span className="tag cloud">Packaged</span></p>
+            </div>
+            <div className="card">
+              <h4>3. Cloud SaaS</h4>
+              <p><strong>ArkClaw, KimiClaw, MaxClaw, DuClaw</strong></p>
+              <p>Runs on their servers. 24/7 uptime. Trade control for convenience.</p>
+              <p><span className="tag cloud">Cloud</span></p>
+            </div>
+          </div>
+
+          {/* ==================== HOW IT WORKS ==================== */}
+          <h2 id="how-it-works">How It Works — The 6-Component Architecture</h2>
+
+          <p>Every "Claw" variant follows this same fundamental pattern. Understanding it helps you use any of them effectively.</p>
+
+          <div className="flow-box">
+            <span className="a">You</span>{'  →  '}
+            <span className="b">Channel</span>{' (Telegram / WhatsApp)  →  '}
+            <span className="c">Gateway</span>{'  →  '}
+            <span className="a">Agent Brain</span>{'  →  '}
+            <span className="b">Tools &amp; Skills</span>
+            {`\n                                                                          ↕\n                                                                   `}
+            <span className="c">Memory System</span>
+          </div>
+
+          <h3>1. Gateway — The Always-On Control Plane</h3>
+          <p>A single Node.js process that routes messages. No AI intelligence lives here — it just connects your messaging channels, manages sessions, and forwards messages to the Agent. Runs as a background daemon (systemd / launchd) that survives reboots.</p>
+
+          <h3>2. Agent Brain — The Reasoning Engine</h3>
+          <p>Takes your message + assembled context and calls the LLM (Claude, GPT, local model, etc.). Uses a <strong>ReAct loop</strong>: reason → call tools → receive results → reason again → repeat until task is complete.</p>
+
+          <h3>3. Tools — 26 Built-In Capabilities</h3>
+          <div className="card-grid card-grid-2">
+            <div className="card"><h4>File &amp; System</h4><p><code>bash</code> shell commands · <code>read/write/edit</code> files · <code>process</code> management · <code>git</code> version control</p></div>
+            <div className="card"><h4>Web &amp; Browser</h4><p><code>browser</code> Chromium CDP automation · <code>web_search</code> · <code>web_fetch</code> page content · <code>canvas</code> visual workspace</p></div>
+            <div className="card"><h4>Communication</h4><p><code>message</code> to channels · <code>sessions_list/send/spawn</code> · <code>discord/slack</code> platform-specific actions</p></div>
+            <div className="card"><h4>Scheduling &amp; Memory</h4><p><code>cron</code> recurring tasks · <code>nodes</code> companion apps · <code>memory_write</code> · <code>gateway</code> management</p></div>
+          </div>
+          <p>Every tool call passes through a <strong>5-level policy chain</strong> before executing: global → provider → agent → session → sandbox.</p>
+
+          <h3>4. Skills — Packaged Domain Expertise</h3>
+          <p>Skills are directories containing a <code>SKILL.md</code> file with instructions. The runtime <strong>selectively injects only relevant skills per turn</strong> — not all 53 at once. You can create your own or ask the agent to build one for itself.</p>
+
+          <h3>5. Memory — Filesystem as Source of Truth</h3>
+          <ul>
+            <li><strong>Short-term:</strong> Daily logs in <code>memory/YYYY-MM-DD.md</code></li>
+            <li><strong>Long-term:</strong> Curated facts in <code>MEMORY.md</code> (preferences, projects, style)</li>
+            <li><strong>Identity:</strong> <code>SOUL.md</code> (personality) + <code>IDENTITY.md</code> (who the agent is)</li>
+            <li><strong>Retrieval:</strong> BM25 keyword + vector similarity. Indices rebuild from Markdown on startup.</li>
+          </ul>
+
+          <h3>6. Heartbeat &amp; Cron — Proactive Intelligence</h3>
+          <p>A heartbeat fires every 30 minutes. The agent reads <code>HEARTBEAT.md</code> and decides if action is needed — check emails, send reminders, monitor flights, etc. This makes it <strong>proactive, not just reactive</strong>.</p>
+
+          {/* ==================== MESSAGE FLOW ==================== */}
+          <h2 id="message-flow">Message Execution Flow — 10 Steps</h2>
+          <p>This is what happens every single time you send a message:</p>
+
+          <ol className="steps">
+            <li><strong>Channel adapter receives your message</strong> — WhatsApp (Baileys), Telegram (grammY), etc. Raw message is normalized.</li>
+            <li><strong>Gateway routes to session</strong> — DMs → main session. Groups → isolated session. Configurable per contact/channel.</li>
+            <li><strong>System prompt assembled</strong> — Reads IDENTITY.md + SOUL.md + TOOLS.md + relevant skills + memory files.</li>
+            <li><strong>Memory search</strong> — Queries for semantically similar past conversations to add useful context.</li>
+            <li><strong>LLM called</strong> with full context + tool registry — streams to your chosen model.</li>
+            <li><strong>Model responds</strong> — Runtime watches for tool calls (bash, browser, file read, etc.).</li>
+            <li><strong>Tool execution</strong> through 5-level policy chain. Sandboxed sessions run in Docker containers.</li>
+            <li><strong>Results fed back to model</strong> — Steps 6–8 repeat until no more tools are called.</li>
+            <li><strong>Response streamed to channel</strong> — Appears in your chat app in real time.</li>
+            <li><strong>Transcript persisted</strong> — Written to JSONL. Memory manager runs compaction if needed.</li>
+          </ol>
+
+          {/* ==================== WORKSPACE ==================== */}
+          <h2 id="workspace">Workspace Files — The Agent's Home</h2>
+          <p>Everything is plain Markdown on disk. Readable, editable, Git-backupable.</p>
+
+          <div className="file-tree">
+            <span className="dir">~/.openclaw/</span>{'\n'}
+            {'├── '}<span className="file">openclaw.json</span>{'          '}<span className="cmt"># Gateway config</span>{'\n'}
+            {'├── '}<span className="file">.env</span>{'                    '}<span className="cmt"># API keys (env vars)</span>{'\n'}
+            {'├── '}<span className="dir">agents/</span>{'\n'}
+            {'│   └── '}<span className="dir">{'<agentId>/'}</span>{'\n'}
+            {'│       └── '}<span className="dir">sessions/</span>{'\n'}
+            {'│           └── '}<span className="file">*.jsonl</span>{'      '}<span className="cmt"># Conversation transcripts</span>{'\n'}
+            {'└── '}<span className="dir">workspace/</span>{'              '}<span className="cmt"># THE AGENT'S HOME</span>{'\n'}
+            {'    ├── '}<span className="file">IDENTITY.md</span>{'         '}<span className="cmt"># Who the agent IS</span>{'\n'}
+            {'    ├── '}<span className="file">SOUL.md</span>{'             '}<span className="cmt"># Personality & principles</span>{'\n'}
+            {'    ├── '}<span className="file">AGENTS.md</span>{'           '}<span className="cmt"># Boot sequence / SOP</span>{'\n'}
+            {'    ├── '}<span className="file">TOOLS.md</span>{'            '}<span className="cmt"># Your specific configs</span>{'\n'}
+            {'    ├── '}<span className="file">USER.md</span>{'             '}<span className="cmt"># Who YOU are</span>{'\n'}
+            {'    ├── '}<span className="file">MEMORY.md</span>{'           '}<span className="cmt"># Long-term memory</span>{'\n'}
+            {'    ├── '}<span className="file">HEARTBEAT.md</span>{'        '}<span className="cmt"># Proactive checklist</span>{'\n'}
+            {'    ├── '}<span className="dir">memory/</span>{'\n'}
+            {'    │   └── '}<span className="file">YYYY-MM-DD.md</span>{'   '}<span className="cmt"># Daily logs</span>{'\n'}
+            {'    └── '}<span className="dir">skills/</span>{'\n'}
+            {'        └── '}<span className="dir">{'<name>/'}</span>{'\n'}
+            {'            └── '}<span className="file">SKILL.md</span>{'    '}<span className="cmt"># Skill definition</span>
+          </div>
+
+          <h3>SOUL.md — The Heart</h3>
+          <pre><code>{`# Soul
+You are Molty, a helpful AI assistant.
+## Core Principles
+- Always be honest
+- Ask before destructive operations
+- Never delete files — move to trash
+- Prefer concise responses`}</code></pre>
+
+          <h3>AGENTS.md — Boot Sequence</h3>
+          <pre><code>{`## Every Session
+Before doing anything:
+1. Read SOUL.md — who you are
+2. Read USER.md — who you're helping
+3. Read memory/YYYY-MM-DD.md (today + yesterday)
+4. If MAIN SESSION: Also read MEMORY.md`}</code></pre>
+
+          <h3>HEARTBEAT.md — Proactive Checklist</h3>
+          <pre><code>{`- [ ] Check for urgent emails
+- [ ] Monitor flight AA1234 for changes
+- [ ] Remind user about dentist at 3pm`}</code></pre>
+
+          <div className="callout tip">
+            <span className="callout-icon">💡</span>
+            <div className="callout-body">
+              <strong>Pro Tip: Git-back your workspace</strong>
+              Put <code>~/.openclaw/workspace</code> in a private Git repo. This gives you backup, recovery, and a full history of how your agent's personality evolved.
+            </div>
+          </div>
+
+          {/* ==================== OPENCLAW SETUP ==================== */}
+          <h2 id="openclaw-setup">OpenClaw — Installation &amp; Setup</h2>
+
+          <div className="callout danger">
+            <span className="callout-icon">🚨</span>
+            <div className="callout-body">
+              <strong>Security Warning</strong>
+              As of March 2026: 8 critical CVEs (CVE-2026-25253 = one-click RCE), 42,665 exposed instances (93% with auth bypass), ~900 malicious skills on ClawHub (~20% of registry). <strong>Always use Docker + security hardening.</strong>
+            </div>
+          </div>
+
+          <h3>Prerequisites</h3>
+          <ul>
+            <li><strong>Node.js 22+</strong> (recommended: Node 24)</li>
+            <li><strong>npm 9+</strong> · <strong>Git</strong> (optional) · <strong>Docker</strong> (recommended)</li>
+            <li>An <strong>API key</strong> — Anthropic, OpenAI, Google, or Ollama for local</li>
+            <li>Windows: use <strong>WSL2</strong> (PowerShell is unstable)</li>
+          </ul>
+          <pre><code>{`node --version    # v22.x+
+npm --version     # 9.x+`}</code></pre>
+
+          <h3>Method 1 — Installer Script (Recommended)</h3>
+          <pre><code>{`curl -fsSL https://openclaw.ai/install.sh | bash`}</code></pre>
+
+          <h3>Method 2 — npm</h3>
+          <pre><code>{`npm install -g openclaw@latest
+openclaw --version
+openclaw onboard --install-daemon`}</code></pre>
+
+          <h3>Method 3 — Docker (Most Secure)</h3>
+          <pre><code>{`docker pull openclaw/openclaw:latest
+docker run -d --name openclaw \\
+  -p 3000:3000 \\
+  -v ~/.openclaw:/root/.openclaw \\
+  -v ~/openclaw/workspace:/workspace \\
+  -e ANTHROPIC_API_KEY=sk-ant-your-key \\
+  openclaw/openclaw:latest`}</code></pre>
+
+          <h3>Method 4 — From Source</h3>
+          <pre><code>{`git clone https://github.com/openclaw/openclaw.git
+cd openclaw && pnpm install && pnpm ui:build && pnpm build
+pnpm openclaw onboard --install-daemon`}</code></pre>
+
+          <h3>Onboarding Wizard</h3>
+          <ol className="steps">
+            <li><strong>Security Warning</strong> — read and accept to continue.</li>
+            <li><strong>Quickstart or Manual</strong> — choose Quickstart.</li>
+            <li><strong>Select AI Provider</strong> — Anthropic, OpenAI, Google, or "Skip" for Ollama.</li>
+            <li><strong>Enter API Key</strong> — or better: <code>export ANTHROPIC_API_KEY=sk-ant-...</code></li>
+            <li><strong>Choose Default Model</strong> — Claude Sonnet 4.6 for best cost/quality.</li>
+            <li><strong>Connect Channel</strong> — WhatsApp QR, Telegram bot token, or Discord.</li>
+            <li><strong>Workspace Created</strong> — SOUL.md, AGENTS.md, etc. auto-generated.</li>
+          </ol>
+
+          <h3>Essential Commands</h3>
+          <pre><code>{`openclaw doctor          # diagnose issues
+openclaw status          # gateway status
+openclaw dashboard       # open browser UI
+openclaw logs --follow   # real-time logs
+openclaw run "Summarize README.md in this directory"`}</code></pre>
+
+          <h3>Configuration</h3>
+          <pre><code>{`// ~/.openclaw/openclaw.json
+{
+  "agent": { "model": "anthropic/claude-sonnet-4-6" },
+  "gateway": { "bind": "loopback" },
+  "agents": { "defaults": { "sandbox": { "mode": "non-main" } } }
+}`}</code></pre>
+
+          {/* ==================== ZEROCLAW ==================== */}
+          <h2 id="zeroclaw-setup">ZeroClaw — Best Overall Alternative</h2>
+          <p><span className="tag rust">Rust</span> 3.4 MB binary · 7.8 MB RAM · &lt;10ms startup · Secure by default · 15+ channels · Reads OpenClaw configs</p>
+          <p>Built by Harvard/MIT students + Sundai.Club (Feb 2026). "Zero overhead, Zero compromise."</p>
+
+          <pre><code>{`# Install Rust toolchain
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Build from source
+git clone https://github.com/zeroclaw-labs/zeroclaw.git
+cd zeroclaw && cargo build --release
+# Binary: target/release/zeroclaw (~3.4MB)`}</code></pre>
+          <pre><code>{`zeroclaw agent              # interactive mode
+zeroclaw daemon             # full autonomous
+zeroclaw doctor             # diagnostics
+zeroclaw migrate openclaw --dry-run  # preview migration
+zeroclaw service install    # background service`}</code></pre>
+
+          {/* ==================== PICOCLAW ==================== */}
+          <h2 id="picoclaw-setup">PicoClaw — Runs on $10 Hardware</h2>
+          <p><span className="tag go">Go</span> &lt;10 MB RAM · &lt;1s boot · RISC-V / ARM / MIPS / x86 · MCP support</p>
+
+          <div className="callout warn">
+            <span className="callout-icon">⚠️</span>
+            <div className="callout-body">
+              <strong>Early Development (v0.2.3)</strong>
+              Pre-v1.0. Not for production. No crypto/token — all pump.fun claims are SCAMS. Only official site: picoclaw.io
+            </div>
+          </div>
+
+          <pre><code>{`# Download and run
+wget https://github.com/sipeed/picoclaw/releases/latest/download/picoclaw_Linux_arm64.tar.gz
+tar xzf picoclaw_Linux_arm64.tar.gz
+./picoclaw onboard
+
+# Old Android phone via Termux:
+pkg install proot && termux-chroot
+./picoclaw onboard`}</code></pre>
+
+          <p><strong>Hardware:</strong> $9.90 LicheeRV-Nano · $30–50 NanoKVM · $35 Raspberry Pi Zero · $0 old Android phone</p>
+
+          {/* ==================== NANOCLAW ==================== */}
+          <h2 id="nanoclaw-setup">NanoClaw — Container Isolation Per Chat</h2>
+          <p><span className="tag ts">TypeScript</span> ~700 lines · Docker per group · Audit logging · Compliance-ready</p>
+          <pre><code>{`git clone https://github.com/nanoclaw/nanoclaw.git && cd nanoclaw
+npm install && cp .env.example .env && npm start`}</code></pre>
+          <p>Best for regulated industries (finance, healthcare, legal) where audit trails and container isolation are compliance requirements.</p>
+
+          {/* ==================== NANOBOT ==================== */}
+          <h2 id="nanobot-setup">NanoBot — 4,000 Lines of Python</h2>
+          <p><span className="tag py">Python</span> ~26,800 stars · Full MCP · Ollama support · Raspberry Pi</p>
+          <pre><code>{`git clone https://github.com/HKUDS/nanobot.git && cd nanobot
+pip install -r requirements.txt
+cp config.example.yaml config.yaml && python main.py`}</code></pre>
+          <p>Best for Python developers, AI researchers, learning agent architecture. Supports Telegram, WhatsApp, Discord, Slack, Email.</p>
+
+          {/* ==================== CHANNELS ==================== */}
+          <h2 id="channels">Connecting Messaging Channels</h2>
+
+          <h3>WhatsApp</h3>
+          <pre><code>{`openclaw channels login
+# Scan QR code with WhatsApp
+# Allowlist: channels.whatsapp.allowFrom: ["+1234567890"]`}</code></pre>
+
+          <h3>Telegram</h3>
+          <pre><code>{`# 1. Create bot via @BotFather → get token
+# 2. Config: "channels": { "telegram": { "token": "YOUR_TOKEN" } }
+# 3. openclaw restart`}</code></pre>
+
+          <h3>Discord</h3>
+          <pre><code>{`# 1. discord.com/developers → Create App → Bot → Get Token
+# 2. Add to openclaw.json → Invite to server`}</code></pre>
+
+          <h3>Session Types</h3>
+          <ul>
+            <li><strong>Main Session</strong> — your DMs. Full access, loads MEMORY.md.</li>
+            <li><strong>Group Sessions</strong> — each group is isolated. Can be Docker-sandboxed.</li>
+            <li><strong>Isolated Sessions</strong> — custom per-contact or security-specific.</li>
+          </ul>
+
+          {/* ==================== SKILLS ==================== */}
+          <h2 id="skills">Skills &amp; Tools</h2>
+          <pre><code>{`openclaw skills install google-calendar
+openclaw skills list`}</code></pre>
+
+          <h3>Creating Your Own Skill</h3>
+          <pre><code>{`mkdir -p ~/.openclaw/workspace/skills/price-monitor
+cat > ~/.openclaw/workspace/skills/price-monitor/SKILL.md << 'EOF'
+---
+name: price-monitor
+description: Monitors competitor pricing
+tools: [web_search, web_fetch, message]
+---
+# Instructions
+1. Visit competitor URLs from TOOLS.md
+2. Extract pricing, compare with ours
+3. Alert if competitor is >10% cheaper
+EOF`}</code></pre>
+
+          <div className="callout danger">
+            <span className="callout-icon">🚨</span>
+            <div className="callout-body">
+              <strong>Skill Security</strong>
+              ~20% of ClawHub skills contain malware. Cisco found skills performing data exfiltration. Only install verified skills. Review source code first.
+            </div>
+          </div>
+
+          {/* ==================== MODELS ==================== */}
+          <h2 id="models">Model Setup — Cloud &amp; Local</h2>
+
+          <h3>Cloud Models (Pay-per-use)</h3>
+          <pre><code>{`// In openclaw.json:
+{ "agent": { "model": "anthropic/claude-sonnet-4-6" } }
+// Or: "openai/gpt-4o", "google/gemini-3-pro", "deepseek/deepseek-chat"`}</code></pre>
+
+          <h3>Local Models (Free via Ollama)</h3>
+          <pre><code>{`# Install Ollama: https://ollama.com
+ollama pull llama3.1:70b          # general (40GB+ VRAM)
+ollama pull deepseek-coder-v2     # coding tasks
+ollama pull llama3.1:8b           # limited hardware (8GB VRAM)
+ollama launch openclaw`}</code></pre>
+
+          <div className="callout info">
+            <span className="callout-icon">ℹ️</span>
+            <div className="callout-body">
+              <strong>Context Window</strong>
+              OpenClaw needs at least 64k tokens context window for local models. Shorter windows cause truncated context and degraded performance.
+            </div>
+          </div>
+
+          {/* ==================== CHINESE VARIANTS ==================== */}
+          <h2 id="chinese-variants">Chinese Tech Giant Variants</h2>
+          <p>Every major Chinese AI company launched their own "Claw" product in March 2026.</p>
+
+          <div className="card-grid card-grid-2">
+            <div className="card">
+              <h4>AutoClaw — Zhipu AI</h4>
+              <p><span className="tag local">Desktop</span> One-click installer. 50+ skills. AutoGLM browser automation. Feishu integration.</p>
+              <p><strong>Setup:</strong> Download from autoclaws.org → Double-click → Done.</p>
+            </div>
+            <div className="card">
+              <h4>QClaw — Tencent</h4>
+              <p><span className="tag local">Desktop</span> <strong>WeChat integration</strong> — control your computer via WeChat messages. Also QQ. Currently in beta.</p>
+            </div>
+            <div className="card">
+              <h4>WorkBuddy — Tencent Cloud</h4>
+              <p><span className="tag local">Desktop</span> Independent product. Daily + Dev modes. QQ, Feishu, DingTalk, WeChat. Best for teams.</p>
+            </div>
+            <div className="card">
+              <h4>ArkClaw — ByteDance</h4>
+              <p><span className="tag cloud">Cloud SaaS</span> Browser-based. Deep Lark integration. Lite: ~18,000 req/month. No install.</p>
+            </div>
+            <div className="card">
+              <h4>KimiClaw — Moonshot AI</h4>
+              <p><span className="tag cloud">Cloud SaaS</span> Kimi's models. 24/7 cloud-hosted. No server management needed.</p>
+            </div>
+            <div className="card">
+              <h4>DuClaw — Baidu</h4>
+              <p><span className="tag cloud">Cloud</span> Visual 4-step deploy. Integrates Qianfan deep research as built-in skill.</p>
+            </div>
+          </div>
+          <p>Also: <strong>MaxClaw</strong> (MiniMax), <strong>EasyClaw</strong> (Cheetah Mobile), <strong>MiClaw</strong> (Xiaomi — OS-level mobile agent), <strong>CoPaw</strong> (Alibaba Cloud).</p>
+
+          {/* ==================== MEMUBOT ==================== */}
+          <h2 id="memubot">memUBot &amp; Other Variants</h2>
+
+          <div className="card-grid card-grid-2">
+            <div className="card"><h4>memUBot</h4><p>"Enterprise-Ready OpenClaw That Remembers Everything." Advanced persistent memory + proactive behavior. By NevaMind AI.</p></div>
+            <div className="card"><h4>IronClaw</h4><p>Maximum security: WASM sandbox + Secrets injection + TEE-backed execution. For regulated industries.</p></div>
+            <div className="card"><h4>NullClaw</h4><p>Written in Zig. Negligible overhead, tiny binary. Experimental. For extreme resource constraints.</p></div>
+            <div className="card"><h4>FreeClaw · TinyClaw · MimiClaw</h4><p>FreeClaw: minimal Python CLI. TinyClaw: multi-agent roles. MimiClaw: ESP32 microcontrollers.</p></div>
+          </div>
+
+          {/* ==================== COMPARISON ==================== */}
+          <h2 id="comparison">Comparison Table</h2>
+
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Agent</th><th>Language</th><th>RAM</th><th>Startup</th><th>Security</th><th>Best For</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><strong>OpenClaw</strong></td><td><span className="tag ts">TypeScript</span></td><td>~1.5 GB</td><td>~6s</td><td>⚠️ Needs hardening</td><td>Max features, ecosystem</td></tr>
+                <tr><td><strong>ZeroClaw</strong></td><td><span className="tag rust">Rust</span></td><td>~7.8 MB</td><td>&lt;10ms</td><td>✅ Secure default</td><td>Best all-around</td></tr>
+                <tr><td><strong>PicoClaw</strong></td><td><span className="tag go">Go</span></td><td>&lt;10 MB</td><td>&lt;1s</td><td>✅ Simple</td><td>IoT, $10 boards</td></tr>
+                <tr><td><strong>NanoClaw</strong></td><td><span className="tag ts">TypeScript</span></td><td>Moderate</td><td>—</td><td>✅✅ Containers</td><td>Regulated industries</td></tr>
+                <tr><td><strong>NanoBot</strong></td><td><span className="tag py">Python</span></td><td>Low</td><td>Fast</td><td>✅ Tiny codebase</td><td>Python devs, learning</td></tr>
+                <tr><td><strong>IronClaw</strong></td><td><span className="tag rust">Rust</span></td><td>Moderate</td><td>—</td><td>✅✅✅ TEE+WASM</td><td>Maximum security</td></tr>
+                <tr><td><strong>AutoClaw</strong></td><td>Packaged</td><td>—</td><td>GUI</td><td>✅ Pre-hardened</td><td>Non-technical (CN)</td></tr>
+                <tr><td><strong>QClaw</strong></td><td>Packaged</td><td>—</td><td>GUI</td><td>✅</td><td>WeChat/QQ users</td></tr>
+                <tr><td><strong>ArkClaw</strong></td><td><span className="tag cloud">Cloud</span></td><td>N/A</td><td>Instant</td><td>Cloud-managed</td><td>ByteDance/Lark</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="card-grid">
+            <div className="card"><h4>🟢 Beginner</h4><p><strong>QClaw / AutoClaw</strong> (CN) or <strong>NanoBot</strong> (EN). Under 30 min setup.</p></div>
+            <div className="card"><h4>🟡 Developer</h4><p><strong>ZeroClaw</strong> best balance. <strong>OpenClaw</strong> for full ecosystem.</p></div>
+            <div className="card"><h4>🔴 Enterprise</h4><p><strong>IronClaw</strong> (TEE) or <strong>NanoClaw</strong> (containers + audit).</p></div>
+          </div>
+
+          {/* ==================== SECURITY ==================== */}
+          <h2 id="security">Security Guide — Do These First</h2>
+
+          <div className="callout danger">
+            <span className="callout-icon">🛡️</span>
+            <div className="callout-body">
+              <strong>Non-Negotiable Security Steps</strong>
+              <ol className="security-steps">
+                <li><strong>Bind Gateway to localhost</strong> — <code>{"\"gateway\": { \"bind\": \"loopback\" }"}</code> (default 0.0.0.0 exposes everything)</li>
+                <li><strong>Env vars for API keys</strong> — <code>export ANTHROPIC_API_KEY=...</code> (never hardcode)</li>
+                <li><strong>Run in Docker</strong> — prevents access to SSH keys, credentials on host</li>
+                <li><strong>Verified skills only</strong> — ~20% of ClawHub is malware. Review source code</li>
+                <li><strong>Review MEMORY.md</strong> — "memory poisoning" embeds malicious instructions</li>
+                <li><strong>SOUL.md boundaries</strong> — "Never delete files" · "If uncertain, refuse"</li>
+                <li><strong>Never expose Control UI to internet</strong> — use SSH tunnel or VPN</li>
+                <li><strong>Sandbox non-main sessions</strong> — <code>{"\"sandbox\": { \"mode\": \"non-main\" }"}</code></li>
+              </ol>
+            </div>
+          </div>
+
+          <div className="callout tip">
+            <span className="callout-icon">💡</span>
+            <div className="callout-body">
+              <strong>Dedicated Machine Strategy</strong>
+              Run your agent on a dedicated device (Mac Mini, VPS, Raspberry Pi) that doesn't hold sensitive files. Full agent power, contained risk. Cost: $5–12/month VPS or $0 for old hardware.
+            </div>
+          </div>
+
+          {/* ==================== COSTS ==================== */}
+          <h2 id="costs">Cost Guide</h2>
+
+          <div className="callout warn">
+            <span className="callout-icon">⚠️</span>
+            <div className="callout-body">
+              <strong>Why Agent Costs &gt; Chat Costs</strong>
+              Each task = 5–15 API calls. Long sessions accumulate 200K+ tokens from context re-sends. <strong>Start new sessions regularly.</strong>
+            </div>
+          </div>
+
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Usage</th><th>$/month</th><th>Description</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Light</td><td>$3–10</td><td>Few tasks/day, short sessions</td></tr>
+                <tr><td>Moderate</td><td>$10–50</td><td>Regular daily use, mixed tasks</td></tr>
+                <tr><td>Heavy</td><td>$50–200+</td><td>Always-on, complex automation</td></tr>
+                <tr><td>Free</td><td>$0</td><td>Local models via Ollama (8GB+ VRAM)</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Claude Sonnet 4.6: $3/$15 per M tokens (best value). Opus 4.6: $5/$25 (~1.7× more).</p>
+
+          {/* ==================== FAQ ==================== */}
+          <h2 id="faq">Frequently Asked Questions</h2>
+
+          <div className="card-grid card-grid-2">
+            <div className="card"><h4>Can I run offline?</h4><p>Yes. ZeroClaw, PicoClaw, NanoBot support offline via Ollama. Need 8GB+ VRAM. Use 64k+ context models.</p></div>
+            <div className="card"><h4>How is this different from ChatGPT?</h4><p>ChatGPT = passive chat. OpenClaw = 24/7 agent with memory, file access, browser, cron, proactive heartbeat.</p></div>
+            <div className="card"><h4>What about ClawdBot / MoltBot?</h4><p>Same project, renamed twice. Uninstall old: <code>npm uninstall -g clawdbot</code>. Configs compatible.</p></div>
+            <div className="card"><h4>Can the agent build its own skills?</h4><p>Yes. Describe a task or point to a YouTube video. It creates a SKILL.md file in your workspace.</p></div>
+            <div className="card"><h4>Is it safe?</h4><p>With hardening: yes. Without: no. Chinese gov restricted it in state agencies. Follow the Security Guide.</p></div>
+            <div className="card"><h4>Resources &amp; Links</h4><p>Docs: <a href="https://docs.openclaw.ai">docs.openclaw.ai</a> · GitHub: <a href="https://github.com/openclaw/openclaw">github.com/openclaw</a> · Variants: <a href="https://openclawindex.pages.dev">openclawindex.pages.dev</a></p></div>
+          </div>
+
+          <div className="doc-footer">
+            <p>Compiled from official repositories, documentation, Wikipedia, and community sources.</p>
+            <p>March 20, 2026 · Always check official repos for the latest.</p>
+          </div>
+
+        </div>
+      </main>
+    </>
+  );
+}

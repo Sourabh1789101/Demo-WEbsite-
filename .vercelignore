@@ -1,9 +1,4 @@
-# Root-level loose HTML source files — not part of the app
-/Complete_Claw_Ecosystem_Guide_2026.html
-/Complete_Claw_Ecosystem_Guide_2026 (1).html
-/mirofish_website.html
-/nemoclaw-guide.html
-
-# Build artifacts
+README.md
+.claude
 my-docs-app/node_modules
 my-docs-app/dist

@@ -8,7 +8,9 @@
       "Bash(npm run:*)",
       "Bash(ls -la \"i:\\\\New folder \\(3\\)\\\\Js file by Claude\\\\my-docs-app\")",
       "Bash(ls -la \"i:\\\\New folder \\(3\\)\\\\Js file by Claude\\\\my-docs-app\\\\src\\\\docs\")",
-      "Bash(ls -la \"i:\\\\New folder \\(3\\)\\\\Js file by Claude\\\\my-docs-app\\\\src\\\\assets\")"
+      "Bash(ls -la \"i:\\\\New folder \\(3\\)\\\\Js file by Claude\\\\my-docs-app\\\\src\\\\assets\")",
+      "Bash(ls \"i:/New folder \\(3\\)/Js file by Claude/my-docs-app/src/docs/\")",
+      "Bash(find \"i:/New folder \\(3\\)/Js file by Claude\" -not -path \"*/node_modules/*\" -not -path \"*/.git/*\" -not -path \"*/dist/*\")"
     ]
   }
 }
