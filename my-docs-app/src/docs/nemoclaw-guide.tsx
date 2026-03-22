@@ -24,21 +24,21 @@ const cssString = `
     --cyan: #00d4aa;
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .nemo-root * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  html { scroll-behavior: smooth; }
-
-  body {
+  .nemo-root {
     background: var(--bg);
     color: var(--text);
     font-family: 'Exo 2', sans-serif;
     font-size: 15px;
     line-height: 1.7;
     overflow-x: hidden;
+    position: relative;
+    min-height: 100%;
   }
 
   /* Scanline overlay */
-  body::before {
+  .nemo-root::before {
     content: '';
     position: fixed;
     inset: 0;
@@ -54,7 +54,7 @@ const cssString = `
   }
 
   /* Grid background */
-  body::after {
+  .nemo-root::after {
     content: '';
     position: fixed;
     inset: 0;
@@ -69,7 +69,7 @@ const cssString = `
   .content-wrap { position: relative; z-index: 1; }
 
   /* ─── HEADER ─── */
-  header {
+  .nemo-root header {
     padding: 0;
     border-bottom: 2px solid var(--border-bright);
     background: linear-gradient(180deg, rgba(118,185,0,0.06) 0%, transparent 100%);
@@ -77,7 +77,7 @@ const cssString = `
     overflow: hidden;
   }
 
-  header::before {
+  .nemo-root header::before {
     content: '';
     position: absolute;
     top: -60%;
@@ -113,7 +113,7 @@ const cssString = `
     text-transform: uppercase;
   }
 
-  h1 {
+  .nemo-root h1 {
     font-family: 'Rajdhani', sans-serif;
     font-size: clamp(2.4rem, 5vw, 4rem);
     font-weight: 800;
@@ -122,7 +122,7 @@ const cssString = `
     letter-spacing: -1px;
   }
 
-  h1 span { color: var(--green); }
+  .nemo-root h1 span { color: var(--green); }
 
   .header-meta {
     font-family: 'IBM Plex Mono', monospace;
@@ -148,7 +148,7 @@ const cssString = `
   @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.7); } }
 
   /* ─── NAV ─── */
-  nav {
+  .nemo-root nav {
     background: var(--panel);
     border-bottom: 1px solid var(--border);
     position: sticky;
@@ -167,7 +167,7 @@ const cssString = `
   }
   .nav-inner::-webkit-scrollbar { display: none; }
 
-  nav a {
+  .nemo-root nav a {
     color: var(--text-dim);
     text-decoration: none;
     font-family: 'Rajdhani', sans-serif;
@@ -180,11 +180,11 @@ const cssString = `
     white-space: nowrap;
     transition: color 0.2s, border-color 0.2s;
   }
-  nav a:hover { color: var(--green-bright); border-bottom-color: var(--green); }
-  nav a.active { color: var(--green); border-bottom-color: var(--green); }
+  .nemo-root nav a:hover { color: var(--green-bright); border-bottom-color: var(--green); }
+  .nemo-root nav a.active { color: var(--green); border-bottom-color: var(--green); }
 
   /* ─── MAIN LAYOUT ─── */
-  main {
+  .nemo-root .nemo-main {
     max-width: 1100px;
     margin: 0 auto;
     padding: 48px 32px;
@@ -195,7 +195,7 @@ const cssString = `
   }
 
   @media (max-width: 780px) {
-    main { grid-template-columns: 1fr; padding: 24px 16px; }
+    .nemo-root .nemo-main { grid-template-columns: 1fr; padding: 24px 16px; }
     .sidebar { display: none; }
   }
 
@@ -242,7 +242,7 @@ const cssString = `
   .sidebar li a:hover .dot { background: var(--green-bright); }
 
   /* ─── SECTIONS ─── */
-  section { margin-bottom: 56px; scroll-margin-top: 70px; }
+  .nemo-root section { margin-bottom: 56px; scroll-margin-top: 70px; }
 
   .section-header {
     display: flex;
@@ -263,7 +263,7 @@ const cssString = `
     letter-spacing: 1px;
   }
 
-  h2 {
+  .nemo-root h2 {
     font-family: 'Rajdhani', sans-serif;
     font-size: 1.8rem;
     font-weight: 700;
@@ -271,7 +271,7 @@ const cssString = `
     letter-spacing: -0.5px;
   }
 
-  h3 {
+  .nemo-root h3 {
     font-family: 'Rajdhani', sans-serif;
     font-size: 1.1rem;
     font-weight: 600;
@@ -281,7 +281,7 @@ const cssString = `
     margin: 24px 0 12px;
   }
 
-  p { color: var(--text); margin-bottom: 14px; }
+  .nemo-root p { color: var(--text); margin-bottom: 14px; }
 
   /* ─── HERO CARD ─── */
   .hero-card {
@@ -638,13 +638,13 @@ const cssString = `
   .cli-table td:last-child { color: var(--text-dim); }
 
   /* ─── TOGGLE DETAILS ─── */
-  details {
+  .nemo-root details {
     border: 1px solid var(--border);
     margin: 10px 0;
     background: var(--panel);
   }
 
-  summary {
+  .nemo-root summary {
     padding: 12px 16px;
     cursor: pointer;
     font-family: 'Rajdhani', sans-serif;
@@ -658,19 +658,19 @@ const cssString = `
     user-select: none;
   }
 
-  summary::before {
+  .nemo-root summary::before {
     content: '▶';
     font-size: 10px;
     color: var(--green);
     transition: transform 0.2s;
   }
 
-  details[open] summary::before { transform: rotate(90deg); }
+  .nemo-root details[open] summary::before { transform: rotate(90deg); }
 
-  details > div { padding: 4px 16px 16px; border-top: 1px solid var(--border); }
+  .nemo-root details > div { padding: 4px 16px 16px; border-top: 1px solid var(--border); }
 
   /* ─── FOOTER ─── */
-  footer {
+  .nemo-root footer {
     border-top: 1px solid var(--border);
     margin-top: 40px;
     padding: 28px 32px;
@@ -685,15 +685,15 @@ const cssString = `
     background: var(--panel);
   }
 
-  footer a { color: var(--green); text-decoration: none; }
-  footer a:hover { color: var(--green-bright); }
+  .nemo-root footer a { color: var(--green); text-decoration: none; }
+  .nemo-root footer a:hover { color: var(--green-bright); }
 
   /* ─── SCROLL ANIMATION ─── */
   .fade-in { opacity: 0; transform: translateY(18px); transition: opacity 0.5s ease, transform 0.5s ease; }
   .fade-in.visible { opacity: 1; transform: translateY(0); }
 
   /* highlight */
-  mark { background: rgba(118,185,0,0.2); color: var(--green-bright); padding: 1px 4px; }
+  .nemo-root mark { background: rgba(118,185,0,0.2); color: var(--green-bright); padding: 1px 4px; }
 
   /* ─── STUDY TOOL ─── */
   .study-fab {
@@ -907,7 +907,7 @@ export default function NemoClawGuide() {
   const studyDone = SECTIONS.filter((s) => studyData[s.id]).length;
 
   return (
-    <>
+    <div className="nemo-root">
       <link
         href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Exo+2:wght@300;400;600;800&display=swap"
         rel="stylesheet"
@@ -957,7 +957,7 @@ export default function NemoClawGuide() {
         </nav>
 
         {/* MAIN */}
-        <main>
+        <div className="nemo-main">
 
           {/* SIDEBAR */}
           <aside className="sidebar">
@@ -1729,7 +1729,7 @@ export default function NemoClawGuide() {
             </section>
 
           </div>{/* /article */}
-        </main>
+        </div>{/* /nemo-main */}
 
         <footer>
           <div>NVIDIA NemoClaw · Compiled from official docs &amp; README · March 2026</div>
@@ -1747,7 +1747,7 @@ export default function NemoClawGuide() {
         id="studyToggle"
         className={`study-fab${studyOpen ? ' active' : ''}`}
         type="button"
-        aria-expanded={studyOpen}
+        aria-expanded={studyOpen ? 'true' : 'false'}
         aria-controls="studyPanel"
         onClick={toggleStudy}
       >
@@ -1780,6 +1780,6 @@ export default function NemoClawGuide() {
           ))}
         </ul>
       </aside>
-    </>
+    </div>
   );
 }

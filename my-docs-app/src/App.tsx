@@ -51,7 +51,7 @@ function App() {
       </header>
 
       {/* ── Content ── */}
-      <main className="flex-1 overflow-hidden transform-[translateZ(0)]">
+      <main className="flex-1 overflow-y-auto transform-[translateZ(0)]">
         <Suspense
           fallback={
             <div className="h-full flex items-center justify-center text-slate-400 text-sm">
